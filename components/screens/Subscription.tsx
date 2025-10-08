@@ -7,14 +7,15 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { Product } from "@/types/page";
+import type { Product, Screen } from "@/types/page";
 
 type SubscriptionProps = {
   products: Product[];
   subscriptionScrollRef: MutableRefObject<HTMLDivElement | null>;
+  onNavigate: (screen: Screen) => void;
 };
 
-export function Subscription({ products, subscriptionScrollRef }: SubscriptionProps) {
+export function Subscription({ products, subscriptionScrollRef, onNavigate }: SubscriptionProps) {
   return (
     <div
       className="flex-1 bg-white p-6 ml-[232px] relative min-h-screen"
@@ -200,6 +201,7 @@ export function Subscription({ products, subscriptionScrollRef }: SubscriptionPr
                     <Button
                       variant="ghost"
                       className="p-0 bg-transparent hover:bg-transparent"
+                      onClick={() => onNavigate("subscriptionAdd")}
                       data-oid="subscription-favorite-button">
                       <Image
                         src="/images/favorite.png"

@@ -9,6 +9,7 @@ import { Order } from "@/components/screens/Order";
 import { Profile } from "@/components/screens/Profile";
 import { Sidebar } from "@/components/screens/Sidebar";
 import { Subscription } from "@/components/screens/Subscription";
+import { SubscriptionAdd } from "@/components/screens/SubscriptionAdd";
 import { useJapaneseFoodApp } from "@/hooks/useJapaneseFoodApp";
 
 export const JapaneseFoodApp = () => {
@@ -87,7 +88,12 @@ export const JapaneseFoodApp = () => {
           <Subscription
             products={products}
             subscriptionScrollRef={subscriptionScrollRef}
+            onNavigate={onNavigate}
           />
+        );
+      case "subscriptionAdd":
+        return (
+          <SubscriptionAdd onNavigate={onNavigate} />
         );
       default:
         return <Dashboard monthlyBudget={monthlyBudget} onNavigate={onNavigate} />;

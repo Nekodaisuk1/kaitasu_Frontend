@@ -69,7 +69,7 @@ export function Sidebar({ currentScreen, hoveredNav, onHoverChange, onNavigate }
     const isSubscriptionKey = key === "subscription";
     const isCatalogKey = key === "catalog";
     const isActive = isSubscriptionKey
-      ? currentScreen === "subscription"
+      ? currentScreen === "subscription" || currentScreen === "subscriptionAdd"
       : isCatalogKey
         ? currentScreen === "catalog" || currentScreen === "catalogLanding"
         : currentScreen === key;

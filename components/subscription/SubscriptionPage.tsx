@@ -1,6 +1,9 @@
+"use client";
+
 import { type RefObject } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +14,9 @@ type SubscriptionPageProps = {
   scrollRef: RefObject<HTMLDivElement>;
 };
 
-const SubscriptionPage = ({ products, scrollRef }: SubscriptionPageProps) => (
+const SubscriptionPage = ({ products, scrollRef }: SubscriptionPageProps) => {
+  const router = useRouter();
+  return (
   <div className="flex-1 bg-white p-6 ml-[232px] relative min-h-screen" data-oid="subscription-page">
     <div className="absolute right-0 top-0 bottom-0 w-1 bg-[#fda900]" data-oid="subscription-accent" />
 
@@ -183,6 +188,7 @@ const SubscriptionPage = ({ products, scrollRef }: SubscriptionPageProps) => (
                     <Button
                       variant="ghost"
                       className="p-0 bg-transparent hover:bg-transparent"
+                      onClick={() => router.push("/subscription/add")}
                       data-oid="subscription-favorite-button">
                       <Image
                         src="/images/favorite.png"
@@ -203,5 +209,6 @@ const SubscriptionPage = ({ products, scrollRef }: SubscriptionPageProps) => (
     </div>
   </div>
 );
+};
 
 export default SubscriptionPage;

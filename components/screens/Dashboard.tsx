@@ -118,7 +118,7 @@ export function Dashboard({ monthlyBudget, onNavigate }: DashboardProps) {
             style={{
               filter: "drop-shadow(4.5px 4.5px 0 #E4E2E2)"
             }}
-            onClick={() => onNavigate("catalog")}
+            onClick={() => onNavigate("subscription")}
             data-oid="eljule7">
 
             <div className="flex h-[145px] flex-col items-center justify-between">

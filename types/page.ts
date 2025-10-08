@@ -6,7 +6,8 @@ export type Screen =
   | "order"
   | "history"
   | "profile"
-  | "subscription";
+  | "subscription"
+  | "subscriptionAdd";
 
 export type SidebarNavKey = Screen | "subscription";
 
