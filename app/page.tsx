@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect, useMemo, type CSSProperties } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,18 +12,18 @@ import {
   Clock as ClockOutline,
   User as UserOutline,
   Search,
-  Heart,
-  Plus,
-  Minus } from
+  Heart } from
 "lucide-react";
 
 type Screen =
 "dashboard" |
 "catalog" |
+"catalogLanding" |
 "cart" |
 "order" |
 "history" |
-"profile";
+"profile" |
+"subscription";
 
 type SidebarNavKey = Screen | "subscription";
 
@@ -42,6 +43,11 @@ interface Product {
   quantity: number;
 }
 
+type LandingCardContent = {
+  title: string;
+  renderIcon?: () => JSX.Element | null;
+};
+
 const sampleProducts: Product[] = [
 {
   id: 1,
@@ -49,7 +55,7 @@ const sampleProducts: Product[] = [
   description: "ナンバー 260g",
   price: 350,
   image: "/images/food-item.jpg",
-  quantity: 1
+  quantity: 0
 },
 {
   id: 2,
@@ -57,7 +63,7 @@ const sampleProducts: Product[] = [
   description: "プレミアム 300g",
   price: 450,
   image: "/images/food-item.jpg",
-  quantity: 1
+  quantity: 0
 },
 {
   id: 3,
@@ -65,7 +71,7 @@ const sampleProducts: Product[] = [
   description: "ジューシー 200g",
   price: 280,
   image: "/images/food-item.jpg",
-  quantity: 1
+  quantity: 0
 },
 {
   id: 4,
@@ -73,7 +79,7 @@ const sampleProducts: Product[] = [
   description: "厚切り 250g",
   price: 380,
   image: "/images/food-item.jpg",
-  quantity: 1
+  quantity: 0
 },
 {
   id: 5,
@@ -81,7 +87,7 @@ const sampleProducts: Product[] = [
   description: "手作り 180g",
   price: 320,
   image: "/images/food-item.jpg",
-  quantity: 1
+  quantity: 0
 },
 {
   id: 6,
@@ -89,7 +95,7 @@ const sampleProducts: Product[] = [
   description: "ノルウェー産 220g",
   price: 420,
   image: "/images/food-item.jpg",
-  quantity: 1
+  quantity: 0
 },
 {
   id: 7,
@@ -97,7 +103,7 @@ const sampleProducts: Product[] = [
   description: "大ぶり 3本",
   price: 390,
   image: "/images/food-item.jpg",
-  quantity: 1
+  quantity: 0
 },
 {
   id: 8,
@@ -105,8 +111,148 @@ const sampleProducts: Product[] = [
   description: "ジューシー 6個",
   price: 300,
   image: "/images/food-item.jpg",
-  quantity: 1
+  quantity: 0
 }];
+
+const FILTER_BUTTONS = [
+  { label: "健康重視", buttonDataOid: ".zvc9j.", textDataOid: "btn-text-health" },
+  { label: "お気に入り", buttonDataOid: "jm:hia2", textDataOid: "btn-text-favorite" }
+];
+
+const FILTER_BUTTON_INACTIVE_STYLE: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "max-content",
+  minWidth: "160px",
+  height: "60px",
+  padding: "0 24px",
+  flexShrink: 0,
+  borderRadius: "20px",
+  border: "2px solid #FDA900",
+  background: "var(--, #FFF)",
+  boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
+};
+
+const FILTER_BUTTON_TEXT_STYLE: CSSProperties = {
+  color: "var(--, #101010)",
+  fontFamily: '"BIZ UDPGothic"',
+  fontSize: "32px",
+  fontStyle: "normal",
+  fontWeight: 700,
+  lineHeight: "normal",
+  letterSpacing: "1.664px"
+};
+
+const LandingIconDefault = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="100"
+    height="100"
+    viewBox="0 0 100 100"
+    fill="none">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M23.1571 12.2211C27.6357 10.2783 31.1928 10.3569 34.0071 11.6354C36.9 12.9497 39.7714 15.8926 42.0714 21.1783C42.938 23.1926 43.5238 25.0497 43.8285 26.7497C44.2428 28.964 46.2357 30.5212 48.4857 30.3926C51.2428 30.2212 53.8357 30.9854 56.1857 32.9569C55.1142 33.6473 54.1238 34.4497 53.2142 35.364C50.9285 37.6497 49.3428 40.4354 48.3928 43.5926C47.9387 45.1081 47.6255 46.6623 47.4571 48.2354C47.2537 50.0879 47.2154 51.9548 47.3428 53.814C46.1333 53.814 44.9261 53.8212 43.7214 53.8354C42.8214 47.1997 41.2428 39.4354 34.7571 31.8426C34.3805 31.3833 33.9161 31.0037 33.3909 30.7262C32.8658 30.4486 32.2906 30.2786 31.699 30.2262C31.1073 30.1738 30.5112 30.2399 29.9454 30.4208C29.3797 30.6016 28.8557 30.8936 28.4042 31.2795C27.9527 31.6654 27.5827 32.1375 27.316 32.6682C27.0493 33.1989 26.8911 33.7775 26.8508 34.3701C26.8105 34.9627 26.8888 35.5573 27.0813 36.1193C27.2737 36.6812 27.5763 37.1991 27.9714 37.6426C32.5285 42.9783 33.8642 48.2283 34.7142 53.9854C28.5139 54.1252 22.3157 54.349 16.1214 54.6569C15.0499 49.4997 16.3642 45.7712 19.15 43.1212C19.9381 42.3712 20.4253 41.3593 20.52 40.2755C20.6147 39.1917 20.3104 38.1107 19.6642 37.2354C18.5191 35.6522 17.5581 33.9435 16.7999 32.1426C14.5 26.8569 14.3142 22.7569 15.3285 19.7426C16.3071 16.814 18.6857 14.1711 23.1571 12.2211ZM91.4285 56.6283C91.6904 55.0473 91.819 53.4021 91.8142 51.6926C91.8142 45.1712 89.9714 39.4497 85.8785 35.364C81.7857 31.2783 76.0642 29.4283 69.5428 29.4283C68.1142 29.4283 66.7261 29.5188 65.3785 29.6997C61.7714 25.1426 57.1357 22.2711 51.7357 21.5926C51.3218 20.2407 50.8281 18.9145 50.2571 17.6211C47.3999 11.0426 43.2357 6.02115 37.6999 3.49972C32.0857 0.956864 25.8357 1.32829 19.6071 4.03544C13.3714 6.73544 8.82852 11.0497 6.86424 16.8926C4.92852 22.6569 5.74995 29.1283 8.60709 35.6997C9.19281 37.0331 9.82614 38.2973 10.5071 39.4926C6.90709 44.464 6.04281 50.5783 7.52138 57.0926C5.64395 58.0185 4.09373 59.4952 3.07777 61.3254C2.06181 63.1557 1.62848 65.2524 1.83567 67.3354C2.79281 76.814 5.02138 85.0854 12.7071 90.6354C20.0714 95.9497 31.7857 98.214 50 98.214C68.2142 98.214 79.9214 95.9569 87.2928 90.6354C94.9785 85.0926 97.2071 76.8212 98.1642 67.3426C98.3838 65.0633 97.8419 62.7755 96.6232 60.837C95.4045 58.8984 93.5777 57.4184 91.4285 56.6283ZM56.2999 53.8426C65.1064 53.9236 73.9105 54.176 82.7071 54.5997C82.8261 53.7092 82.8857 52.7402 82.8857 51.6926C82.8857 46.814 81.5285 43.6426 79.5642 41.6783C77.5999 39.714 74.4214 38.3569 69.5428 38.3569C67.6714 38.3664 66.038 38.5521 64.6428 38.914L64.5428 38.9426C64.0219 39.0802 63.5092 39.2471 63.0071 39.4426C62.0547 39.8235 61.2214 40.2831 60.5071 40.8212C59.2694 41.7471 58.2824 42.9673 57.6357 44.3712C56.75 46.2069 56.2071 48.6069 56.2071 51.6926C56.2071 52.4497 56.238 53.1712 56.2999 53.8426Z"
+      fill="#101010"
+    />
+  </svg>
+);
+
+const LandingIconSecond = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="100"
+    height="100"
+    viewBox="0 0 100 100"
+    fill="none">
+    <path
+      d="M29.4729 52.3893H21.2503C21.6221 51.6143 22.2053 50.9602 22.9327 50.5024C23.6601 50.0446 24.5021 49.8017 25.3616 49.8017C26.2211 49.8017 27.0631 50.0446 27.7905 50.5024C28.518 50.9602 29.1012 51.6143 29.4729 52.3893ZM42.629 49.7932C42.6316 48.7271 42.7101 47.6625 42.864 46.6076C42.2256 46.7105 41.6164 46.948 41.0769 47.3045C40.5373 47.6609 40.0798 48.1281 39.7347 48.6749C39.3897 49.2218 39.1649 49.8358 39.0754 50.4762C38.9859 51.1166 39.0336 51.7687 39.2155 52.3893H42.7888C42.6877 51.5276 42.6374 50.6607 42.6384 49.7932H42.629ZM24.1657 32.991C21.1116 29.9369 17.0099 26.709 13.3919 26.709H13.0911L13.2815 30.468C15.0224 30.3834 17.8298 32.0891 20.9942 35.1664C21.1932 35.3591 21.3882 35.5526 21.5792 35.7469C22.0983 35.6348 22.627 35.5727 23.1579 35.5613C23.35 34.6527 23.6938 33.783 24.1751 32.9887L24.1657 32.991ZM28.9255 29.2932C29.431 28.6994 29.8837 28.0627 30.2786 27.3902C30.8765 26.3759 31.3431 25.2897 31.6673 24.1578C31.9902 23.0331 32.1678 21.8716 32.1958 20.7018C32.2206 19.6133 32.111 18.526 31.8692 17.4645C31.7625 17.0021 31.6315 16.5458 31.4767 16.0973C31.3483 15.7264 31.2026 15.3618 31.0399 15.0047C30.9264 14.7573 30.8033 14.5144 30.671 14.2766C30.6265 14.192 30.5794 14.1238 30.5536 14.0793L30.5112 14.0109L30.4409 14.0461C30.3938 14.0697 30.321 14.1051 30.2388 14.152C29.9982 14.2841 29.763 14.4259 29.5339 14.5771C29.2073 14.7938 28.8936 15.0291 28.5942 15.282C28.2276 15.5828 27.877 15.9027 27.544 16.2404C26.7824 17.0174 26.1196 17.8854 25.5706 18.8248C24.9816 19.8359 24.5245 20.9183 24.2104 22.0455C23.8874 23.1759 23.7089 24.3427 23.6794 25.518C23.6563 26.6063 23.766 27.6934 24.006 28.7553C24.1991 29.5976 24.4762 30.4185 24.8329 31.2057C24.9247 31.4123 25.014 31.5885 25.0938 31.7365C26.1225 30.5808 27.4524 29.734 28.9349 29.2908L28.9255 29.2932ZM95.803 20.7184C95.7585 20.6924 95.6878 20.65 95.6034 20.6055C95.3634 20.4761 95.1172 20.3585 94.8657 20.2531C94.5532 20.1215 94.1821 19.9758 93.764 19.842C93.3117 19.698 92.8521 19.5781 92.3872 19.4826C91.32 19.2671 90.2303 19.1843 89.1429 19.2359C87.9735 19.2916 86.816 19.4969 85.6987 19.8467C84.5802 20.1931 83.5099 20.6793 82.5132 21.2939C81.587 21.8671 80.7342 22.5511 79.9735 23.3307L79.8677 23.4436C80.9489 24.7226 81.7844 26.1905 82.3321 27.7732C83.0647 27.8613 83.8034 27.8888 84.5405 27.8555C85.7102 27.8001 86.8682 27.5973 87.987 27.2518C89.1067 26.9105 90.178 26.4273 91.1749 25.8139C92.1021 25.2422 92.9551 24.5581 93.7146 23.7771C94.0465 23.4361 94.3602 23.0777 94.6542 22.7035C94.9245 22.3559 95.1522 22.0316 95.3333 21.7402C95.5142 21.4488 95.6526 21.2094 95.7421 21.0354C95.789 20.9508 95.822 20.8758 95.8431 20.8287L95.8782 20.7559L95.803 20.7184ZM79.0761 7.81602C78.9915 7.48457 78.9093 7.17227 78.8835 7.03125L75.1763 7.7125C75.2255 7.98281 75.3101 8.30684 75.4253 8.75332C75.9749 10.8818 77.2413 15.7871 75.7144 20.1264C76.8692 20.7271 77.9324 21.4897 78.8716 22.391C81.369 16.741 79.7526 10.4707 79.0667 7.81582L79.0761 7.81602ZM35.1911 92.9688H59.1399C63.221 92.9688 67.2621 92.165 71.0325 90.6033C74.8029 89.0416 78.2288 86.7525 81.1145 83.8668C84.0002 80.981 86.2893 77.5551 87.851 73.7847C89.4128 70.0143 90.2166 65.9732 90.2165 61.8922V56.148H4.12158V61.8945C4.1221 70.135 7.3955 78.0378 13.2219 83.8651C19.0483 89.6924 26.9507 92.967 35.1911 92.9688ZM83.0745 49.7932C83.0793 45.0733 81.2574 40.5347 77.9905 37.1281C78.7451 35.8209 79.1889 34.3577 79.2878 32.8516C79.3866 31.3455 79.1378 29.8369 78.5605 28.4423C77.9832 27.0477 77.093 25.8045 75.9587 24.8088C74.8243 23.8132 73.4762 23.0917 72.0185 22.7002C70.5608 22.3087 69.0326 22.2577 67.552 22.551C66.0715 22.8443 64.6782 23.4742 63.4799 24.3919C62.2816 25.3096 61.3104 26.4906 60.6413 27.8436C59.9723 29.1965 59.6233 30.6852 59.6214 32.1945C55.3778 33.4247 51.7215 36.1468 49.3261 39.8594C46.9306 43.572 45.9573 48.0252 46.5853 52.3986H82.8819C83.0073 51.5357 83.0716 50.6651 83.0745 49.7932ZM35.278 51.1111C35.2771 49.0919 36.014 47.1419 37.3501 45.6279C36.9128 44.7977 36.2303 44.1224 35.3956 43.6938C34.5608 43.2652 33.6143 43.1041 32.6848 43.2325C31.7553 43.3608 30.8879 43.7724 30.2005 44.4111C29.5132 45.0499 29.0393 45.8849 28.8433 46.8025C29.9703 47.3246 30.9669 48.0912 31.7605 49.0466C32.5542 50.0021 33.125 51.1223 33.4315 52.326C34.0845 52.306 34.7254 52.1456 35.3108 51.8559C35.2891 51.6082 35.2782 51.3597 35.278 51.1111ZM19.7726 48.1887C19.2013 47.1393 18.2416 46.3556 17.0992 46.0056C15.9569 45.6556 14.7228 45.7672 13.6618 46.3164C12.6008 46.8657 11.7972 47.8089 11.4235 48.9437C11.0498 50.0786 11.1357 51.3147 11.6628 52.3869H17.2659C17.6623 50.7686 18.5346 49.3063 19.7702 48.1887H19.7726ZM35.3673 35.1641C34.936 34.3334 34.2597 33.6554 33.4302 33.2219C32.6006 32.7885 31.6579 32.6205 30.7297 32.7408C29.8014 32.861 28.9326 33.2637 28.241 33.8943C27.5493 34.5249 27.0682 35.3529 26.8628 36.266C28.4852 37.0273 29.8207 38.2887 30.6733 39.865C31.3952 39.6226 32.1471 39.4811 32.9077 39.4445C33.2755 37.8023 34.1321 36.3099 35.3647 35.1641H35.3673ZM41.0313 36.6912C40.0174 36.6892 39.0315 37.0247 38.2293 37.6449C37.4271 38.265 36.8541 39.1346 36.6007 40.1164C38.182 40.7998 39.5142 41.9541 40.4159 43.4219C41.4265 42.9995 42.511 42.7824 43.6063 42.783H43.7731C44.1583 41.6263 44.64 40.5041 45.2132 39.4281C44.8576 38.6149 44.2727 37.9229 43.53 37.4368C42.7874 36.9508 41.9191 36.6916 41.0315 36.6912H41.0313ZM27.4524 41.8479C27.0429 41.0176 26.3904 40.3315 25.5817 39.8808C24.773 39.4301 23.8463 39.2361 22.9247 39.3246C22.0031 39.4131 21.1303 39.7798 20.4221 40.3761C19.7139 40.9724 19.2038 41.77 18.9597 42.6631C20.7033 43.3987 22.1466 44.7028 23.0546 46.3633C23.7426 46.1655 24.4533 46.0573 25.169 46.0414C25.5041 44.4506 26.298 42.9925 27.4524 41.8479Z"
+      fill="#101010"
+    />
+  </svg>
+);
+
+const LandingIconThird = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="82" 
+    height="92" 
+    viewBox="0 0 82 92" 
+    fill="none">
+    <path 
+      fill-rule="evenodd" 
+      clip-rule="evenodd" 
+      d="M57.5082 0.640962C61.8415 0.849295 65.6665 1.7743 68.6457 2.87013C71.4582 3.90763 73.979 5.26596 75.354 6.64513C76.729 8.02013 78.0915 10.541 79.1248 13.3535C80.4305 16.931 81.1836 20.6866 81.3582 24.491C81.7123 31.9493 79.9207 40.8535 73.3582 49.3618L73.2832 49.5576L67.2957 61.541C66.9208 62.2908 66.3286 62.9101 65.5962 63.318C64.8639 63.7259 64.0255 63.9034 63.1907 63.8273C62.3559 63.7513 61.5634 63.4252 60.9169 62.8917C60.2703 62.3581 59.7997 61.642 59.5665 60.8368C54.1695 63.5256 48.3206 65.1899 42.3165 65.7451L40.1915 65.9201L37.7623 66.0826L33.6957 66.3035L29.3123 66.5118C27.2165 66.6118 25.0873 66.7118 23.029 66.8201C22.8645 69.1252 22.6087 71.4228 22.2623 73.7076C22.0721 75.0582 21.7497 76.3868 21.2998 77.6743C20.504 79.766 18.8123 81.5201 16.429 81.5201C13.2957 81.5201 10.4457 79.3118 8.12484 77.116L7.00817 76.0326L5.42484 74.4451C3.07484 72.0285 0.479004 68.966 0.479004 65.5701C0.479004 63.6535 1.5915 62.4118 2.29567 61.8326C3.53317 60.8118 5.13317 60.3326 6.72067 60.0118L8.28734 59.7368C10.5735 59.3903 12.8726 59.1345 15.179 58.9701L15.7623 46.9035L15.9165 44.2368L16.0748 41.8076C16.1304 41.0437 16.1901 40.3354 16.254 39.6826C16.829 33.6243 18.5082 27.6826 21.1623 22.4326C20.3574 22.199 19.6416 21.7279 19.1085 21.0811C18.5754 20.4343 18.2498 19.6417 18.1742 18.807C18.0986 17.9722 18.2765 17.134 18.6847 16.402C19.093 15.6699 19.7125 15.0779 20.4623 14.7035L32.2457 8.80763C32.3733 8.74544 32.504 8.68981 32.6373 8.64096C41.1415 2.07846 50.0498 0.282628 57.5082 0.640962ZM60.6248 21.3743C59.4529 20.2018 57.8632 19.5429 56.2055 19.5425C54.5477 19.5421 52.9577 20.2003 51.7852 21.3722C50.6128 22.5441 49.9539 24.1338 49.9535 25.7916C49.9531 27.4493 50.6112 29.0393 51.7832 30.2118C52.9614 31.3508 54.5399 31.9816 56.1786 31.9681C57.8173 31.9546 59.3852 31.2981 60.5446 30.1398C61.7039 28.9816 62.362 27.4143 62.377 25.7756C62.392 24.1368 61.7628 22.5536 60.6248 21.3743Z" 
+      fill="#101010"/>
+  </svg>
+);
+
+const LandingIconFourth = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="84" 
+    height="84" 
+    viewBox="0 0 84 84" 
+    fill="none">
+    <path 
+      d="M75.9999 45.0419C78.7709 42.2748 80.8843 38.9201 82.1839 35.226C83.4835 31.5319 83.936 27.5929 83.5079 23.7003C83.0798 19.8077 81.7822 16.0612 79.7109 12.7378C77.6396 9.41434 74.8476 6.5991 71.5416 4.50024C63.1666 -1.04143 51.9582 -1.0831 43.4999 4.37524C36.1666 9.08357 32.1249 16.4169 31.4166 24.0002C30.8749 29.5002 28.7916 34.6252 24.9582 38.4586L24.8332 38.5836C19.9999 43.4169 19.9999 50.7919 24.5416 55.2919L28.6666 59.4169C30.8496 61.5985 33.8095 62.8239 36.8957 62.8239C39.9819 62.8239 42.9419 61.5985 45.1249 59.4169C49.1666 55.3752 54.4999 53.1669 60.2915 52.5419C65.9999 51.9169 71.5832 49.4169 75.9999 45.0419ZM18.0832 74.7502C19.2082 77.0836 18.8332 79.9169 16.8749 81.8336C16.0267 82.6945 14.9457 83.2892 13.7645 83.5447C12.5833 83.8001 11.3532 83.7053 10.2251 83.2717C9.09695 82.8382 8.11991 82.0848 7.41378 81.104C6.70766 80.1232 6.30316 78.9576 6.24989 77.7502C5.04252 77.697 3.87694 77.2925 2.89614 76.5863C1.91534 75.8802 1.16196 74.9032 0.728414 73.7751C0.294868 72.647 0.200009 71.4169 0.455472 70.2356C0.710935 69.0544 1.30561 67.9734 2.16656 67.1252C4.08322 65.2086 6.95822 64.7919 9.24989 65.9169L19.5832 55.7919C20.1666 56.5836 20.8332 57.5002 21.5832 58.2502L25.7082 62.3752C26.5832 63.2086 27.4166 63.9169 28.4999 64.5419L18.0832 74.7502Z" 
+      fill="#101010"/>
+  </svg>
+);
+
+const LandingIconFifth = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="84" 
+    height="60" 
+    viewBox="0 0 84 60" 
+    fill="none">
+    <path 
+      d="M58.6668 25.833V0.833008H75.3335C77.6252 0.833008 79.5877 1.64967 81.221 3.28301C82.8543 4.91634 83.6696 6.87745 83.6668 9.16634V25.833H58.6668ZM8.66683 59.1663C6.37516 59.1663 4.41405 58.3511 2.7835 56.7205C1.15294 55.09 0.336274 53.1274 0.333496 50.833V9.16634C0.333496 6.87467 1.15016 4.91356 2.7835 3.28301C4.41683 1.65245 6.37794 0.835786 8.66683 0.833008H50.3335V59.1663H8.66683ZM25.3335 36.2497C27.0696 36.2497 28.546 35.6427 29.7627 34.4288C30.9793 33.215 31.5863 31.7386 31.5835 29.9997C31.5807 28.2608 30.9738 26.7858 29.7627 25.5747C28.5516 24.3636 27.0752 23.7552 25.3335 23.7497C23.5918 23.7441 22.1168 24.3524 20.9085 25.5747C19.7002 26.7969 19.0918 28.2719 19.0835 29.9997C19.0752 31.7275 19.6835 33.2038 20.9085 34.4288C22.1335 35.6538 23.6085 36.2608 25.3335 36.2497ZM58.6668 59.1663V34.1663H83.6668V50.833C83.6668 53.1247 82.8516 55.0872 81.221 56.7205C79.5904 58.3538 77.6279 59.1691 75.3335 59.1663H58.6668Z" 
+      fill="#101010"/>
+  </svg>
+);
+
+const LandingIconSixth = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="76" 
+    height="76" 
+    viewBox="0 0 76 76" 
+    fill="none">
+    <path 
+      d="M67.1667 10.0833C72.1667 12.1667 75.5 17.5833 75.5 23.4167C75.5 52.1667 52.1667 75.5 23.4167 75.5C17.5833 75.5 12.5833 72.1667 10.0833 67.1667L0.5 73.4167V48.4167L10.0833 54.6667C12.5833 49.6667 17.5833 46.3333 23.4167 46.3333C35.9167 46.3333 46.3333 35.9167 46.3333 23.4167C46.3333 17.5833 49.6667 12.5833 54.6667 10.0833L48.4167 0.5H73.4167L67.1667 10.0833Z" 
+      fill="#101010"/>
+  </svg>
+);
+
+const LandingIconSeventh = () => (
+  <div className="flex h-[100px] w-[100px] items-center justify-center">
+    <Image
+      src="/images/DairyAndEggs.png"
+      alt="Dairy and Eggs"
+      width={100}
+      height={100}
+    />
+  </div>
+);
+
+/**
+ * Update genre card titles/icons by editing LANDING_CARD_CONTENT.
+ * Use null for icon to keep the dashed placeholder.
+ */
+const LANDING_CARD_CONTENT: LandingCardContent[] = [
+  { title: "ジャンル 1", renderIcon: () => <LandingIconDefault /> },
+  { title: "ジャンル 2", renderIcon: () => <LandingIconSecond /> },
+  { title: "ジャンル 3", renderIcon: () => <LandingIconThird /> },
+  { title: "ジャンル 4", renderIcon: () => <LandingIconFourth /> },
+  { title: "ジャンル 5", renderIcon: () => <LandingIconFifth /> },
+  { title: "ジャンル 6", renderIcon: () => <LandingIconSixth /> },
+  { title: "ジャンル 7", renderIcon: () => <LandingIconSeventh /> },
+  { title: "ジャンル 8" }
+];
 
 const SIDEBAR_ACTIVE_BG =
   "url(\"data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22192%22%20height=%22100%22%20viewBox=%220%200%20192%20100%22%20fill=%22none%22%3E%3Cpath%20d=%22M0%2040.0005C0%2028.9548%208.9543%2020.0005%2020%2020.0005H192V79.2693H20C8.95431%2079.2693%200%2070.315%200%2059.2693V40.0005Z%22%20fill=%22white%22/%3E%3Cpath%20d=%22M192%2079.2695H172C183.046%2079.2697%20192%2088.224%20192%2099.2695V79.2695Z%22%20fill=%22white%22/%3E%3Cpath%20d=%22M192%2020H172C183.046%2019.9998%20192%2011.0456%20192%200V20Z%22%20fill=%22white%22/%3E%3C/svg%3E\")";
@@ -248,7 +394,7 @@ export default function JapaneseFoodApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("dashboard");
   const [hoveredNav, setHoveredNav] = useState<SidebarNavKey | null>(null);
   const [monthlyBudget, setMonthlyBudget] = useState(7500);
-  const [cartItems, setCartItems] = useState<Product[]>([
+const [cartItems, setCartItems] = useState<Product[]>([
   {
     id: 1,
     name: "トップリブ 特製",
@@ -275,7 +421,19 @@ export default function JapaneseFoodApp() {
   }]
   );
   const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const catalogScrollRef = useRef<HTMLDivElement | null>(null);
+  const subscriptionScrollRef = useRef<HTMLDivElement | null>(null);
+  const pendingProductScrollTop = useRef<number | null>(null);
+  const [landingPage, setLandingPage] = useState(1);
   const topButtonIconSize = 126;
+  const catalogQuantitySum = useMemo(
+    () => products.reduce((sum, product) => sum + product.quantity, 0),
+    [products]
+  );
+  const catalogPriceSum = useMemo(
+    () => products.reduce((sum, product) => sum + product.quantity * product.price, 0),
+    [products]
+  );
 
   const updateQuantity = (id: number, change: number) => {
     setCartItems((items) =>
@@ -290,14 +448,26 @@ export default function JapaneseFoodApp() {
   };
 
   const updateProductQuantity = (id: number, change: number) => {
+    const activeScrollContainer = catalogScrollRef.current ?? subscriptionScrollRef.current;
+    if (activeScrollContainer) {
+      pendingProductScrollTop.current = activeScrollContainer.scrollTop;
+    }
     setProducts((items) =>
     items.map((item) =>
     item.id === id ?
-    { ...item, quantity: Math.max(1, item.quantity + change) } :
+    { ...item, quantity: Math.max(0, item.quantity + change) } :
     item
     )
     );
   };
+
+  useLayoutEffect(() => {
+    const activeScrollContainer = catalogScrollRef.current ?? subscriptionScrollRef.current;
+    if (pendingProductScrollTop.current !== null && activeScrollContainer) {
+      activeScrollContainer.scrollTop = pendingProductScrollTop.current;
+      pendingProductScrollTop.current = null;
+    }
+  }, [products]);
 
   const addToCart = (product: Product) => {
     setCartItems((items) => {
@@ -322,7 +492,13 @@ export default function JapaneseFoodApp() {
       dataOid: string,
       onClick?: () => void
     ) => {
-      const isActive = key !== "subscription" && currentScreen === key;
+      const isSubscriptionKey = key === "subscription";
+      const isCatalogKey = key === "catalog";
+      const isActive = isSubscriptionKey ?
+        currentScreen === "subscription" :
+        isCatalogKey ?
+        currentScreen === "catalog" || currentScreen === "catalogLanding" :
+        currentScreen === key;
       const isHovered = hoveredNav === key;
       const showHighlight = isActive || isHovered;
       const highlightOpacity = isActive ? 1 : isHovered ? 0.4 : 0;
@@ -414,10 +590,16 @@ export default function JapaneseFoodApp() {
 
         <nav className="w-full flex flex-col items-end space-y-2 pr-0" data-oid="bglg0.p">
           {renderSidebarButton("dashboard", "ホーム", SidebarHomeIcon, "lqzeqpl", () => setCurrentScreen("dashboard"))}
-          {renderSidebarButton("catalog", "買い出し", SidebarCatalogIcon, "iu4097_", () => setCurrentScreen("catalog"))}
+          {renderSidebarButton("catalog", "買い出し", SidebarCatalogIcon, "iu4097_", () => setCurrentScreen("catalogLanding"))}
           {renderSidebarButton("cart", "買い物かご", SidebarCartIcon, "1yqj0f6", () => setCurrentScreen("cart"))}
           {renderSidebarButton("history", "購入履歴", SidebarHistoryIcon, "rzbvl29", () => setCurrentScreen("history"))}
-          {renderSidebarButton("subscription", "定期購入", SidebarSubscriptionIcon, "sub-btn-1")}
+          {renderSidebarButton(
+            "subscription",
+            "定期購入",
+            SidebarSubscriptionIcon,
+            "sub-btn-1",
+            () => setCurrentScreen("subscription")
+          )}
           {renderSidebarButton("profile", "マイページ", SidebarProfileIcon, "jyqaqbq", () => setCurrentScreen("profile"))}
         </nav>
       </div>
@@ -455,7 +637,7 @@ export default function JapaneseFoodApp() {
 
         {/* Budget Card */}
         <Card
-        className="w-[903px] p-4"
+        className="w-[903px] h-[230px] p-4 gap-[9px]"
         style={{
           borderRadius: "14.469px",
           border: "5px solid var(--primary, #FDA900)",
@@ -464,24 +646,34 @@ export default function JapaneseFoodApp() {
         data-oid="t2fyzfc">
 
           <div
-          className="flex justify-between items-end mb-2"
+          className="flex justify-between  items-smart mt-[7px] mb-2"
           data-oid=":be0a2k">
 
-            <span className="text-sm font-medium" data-oid=":6v2jl-">
+            <span className="text-sm font-medium text-[30px]" data-oid=":6v2jl-">
               今月の予算 ▶
             </span>
-            <div className="flex items-baseline gap-2" data-oid="qq2w-88">
-              <span className="font-bold text-lg">残り</span>
+            <div className="flex items-baseline gap-2 mt-[29px] mr-[81px] self-end" data-oid="qq2w-88">
+              <span className="font-bold text-lg text-[20px]">残り</span>
               <span className="font-bold text-[36px] leading-none">
                 ¥{monthlyBudget.toLocaleString("ja-JP")}
               </span>
             </div>
           </div>
-          <div className="text-xs text-[#adadad] mb-2" data-oid="woecoz3">
-            今月の支出　¥12,500
+          <div className="flex w-[703px] justify-between mb-[7px] mt-[9px]"  data-oid="h3m4f7m">
+          <div className="text-xs text-[#adadad] text-[20px]" data-oid="woecoz3">
+            ¥12,500
+          </div>
+          <div className="flex" data-oid="h3m4f7m">
+            <div className="text-xs text-right text-[#209fde] text-[20px]" data-oid="6x91r4a">
+            使用率:
+            </div>
+            <div className="text-xs text-right text-[#101010] text-[20px]" data-oid="6x91r4a">
+            60%
+          </div>
+          </div>
           </div>
           <div
-          className="w-full bg-[#adadad] rounded-full h-[34px] mb-1"
+          className="w-[744px] bg-[#adadad] rounded-full h-[34px] mb-1 mx-auto"
           data-oid="pk6di4e">
 
             <div
@@ -489,9 +681,6 @@ export default function JapaneseFoodApp() {
             style={{ width: "60%" }}
             data-oid="5_0shjj">
           </div>
-          </div>
-          <div className="text-xs text-right text-[#209fde]" data-oid="6x91r4a">
-            使用率: 60%
           </div>
         </Card>
 
@@ -611,307 +800,256 @@ export default function JapaneseFoodApp() {
       data-oid="kh0_yce">
     </div>
 
-      <div className="max-w-4xl mx-auto" data-oid="psedc55">
+      <div className="mx-auto w-[1000px]" data-oid="psedc55">
         <div className="relative mb-6" data-oid="gfk0oa_">
           <Search
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#adadad]"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#fda900]"
           size={18}
           data-oid="wum_nxs" />
 
 
           <Input
           placeholder="商品名で検索"
-          className="pl-12 h-12 border-2 border-[#209fde] text-sm rounded-lg bg-white shadow-sm focus:border-[#209fde] focus:ring-2 focus:ring-[#209fde]/20"
+          className="pl-12 h-12 border-2 border-[#fda900] text-sm rounded-lg bg-white shadow-sm focus:border-[#209fde] focus:ring-2 focus:ring-[#209fde]/20"
           data-oid="fsk2zzr" />
 
         </div>
 
         <div className="flex gap-[25px] mb-6" data-oid="br-d9o3">
-          <Button
-          variant="ghost"
-          className="border border-transparent p-0"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "max-content",
-            minWidth: "160px",
-            height: "60px",
-            padding: "0 24px",
-            flexShrink: 0,
-            borderRadius: "20px",
-            border: "2px solid var(--, #FDA900)",
-            background: "var(--, #FFF)",
-            boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
-          }}
-          data-oid=".zvc9j.">
-
-            <span
-            style={{
-              color: "var(--, #101010)",
-              fontFamily: '"BIZ UDPGothic"',
-              fontSize: "32px",
-              fontStyle: "normal",
-              fontWeight: 700,
-              lineHeight: "normal",
-              letterSpacing: "1.664px"
-            }}
-            data-oid="btn-text-health">
-
-              健康重視
-            </span>
-          </Button>
-          <Button
-          variant="ghost"
-          className="border border-transparent p-0"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "max-content",
-            minWidth: "160px",
-            height: "60px",
-            padding: "0 24px",
-            flexShrink: 0,
-            borderRadius: "20px",
-            border: "2px solid var(--, #FDA900)",
-            background: "var(--, #FFF)",
-            boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
-          }}
-          data-oid="jm:hia2">
-
-            <span
-            style={{
-              color: "var(--, #101010)",
-              fontFamily: '"BIZ UDPGothic"',
-              fontSize: "32px",
-              fontStyle: "normal",
-              fontWeight: 700,
-              lineHeight: "normal",
-              letterSpacing: "1.664px"
-            }}
-            data-oid="btn-text-favorite">
-
-              お気に入り
-            </span>
-          </Button>
-          <Button
-          variant="ghost"
-          className="border border-transparent p-0"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "max-content",
-            minWidth: "160px",
-            height: "60px",
-            padding: "0 24px",
-            flexShrink: 0,
-            borderRadius: "20px",
-            border: "2px solid var(--, #FDA900)",
-            background: "var(--, #FFF)",
-            boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
-          }}
-          data-oid="oxpz50q">
-
-            <span
-            style={{
-              color: "var(--, #101010)",
-              fontFamily: '"BIZ UDPGothic"',
-              fontSize: "32px",
-              fontStyle: "normal",
-              fontWeight: 700,
-              lineHeight: "normal",
-              letterSpacing: "1.664px"
-            }}
-            data-oid="btn-text-price">
-
-              価格順
-            </span>
-          </Button>
-          <Button
-          variant="ghost"
-          className="border border-transparent p-0"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "max-content",
-            minWidth: "160px",
-            height: "60px",
-            padding: "0 24px",
-            flexShrink: 0,
-            borderRadius: "20px",
-            border: "2px solid var(--, #FDA900)",
-            background: "var(--, #FFF)",
-            boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
-          }}
-          data-oid="apgxdwh">
-
-            <span
-            style={{
-              color: "var(--, #101010)",
-              fontFamily: '"BIZ UDPGothic"',
-              fontSize: "32px",
-              fontStyle: "normal",
-              fontWeight: 700,
-              lineHeight: "normal",
-              letterSpacing: "1.664px"
-            }}
-            data-oid="btn-text-subscription">
-
-              定期購入
-            </span>
-          </Button>
+          {FILTER_BUTTONS.map(({ label, buttonDataOid, textDataOid }) => (
+            <Button
+              key={label}
+              variant="ghost"
+              className="border border-transparent p-0"
+              style={FILTER_BUTTON_INACTIVE_STYLE}
+              data-oid={buttonDataOid}>
+              <span style={FILTER_BUTTON_TEXT_STYLE} data-oid={textDataOid}>
+                {label}
+              </span>
+            </Button>
+          ))}
         </div>
 
-        <div className="flex justify-center gap-[25px] mb-6" data-oid="uy6_dcp">
-          {[1, 2, 3, 4, 5].map((num) => {
-            const isActive = num === 1;
-            return (
-              <Button
-                key={num}
-                size="sm"
-                variant="ghost"
-                className="border border-transparent p-0"
+        <div
+        className="relative mt-[23px] mb-[24px] w-[1000px]"
+        data-oid="catalog-card-background">
+          <div
+          className="pointer-events-none absolute top-0 left-0 z-0 h-[507px] w-[1000px]"
+          style={{
+            borderRadius: "20px",
+            background: "rgba(253, 169, 0, 0.5)"
+          }}
+          aria-hidden="true"
+          />
+          <div
+          ref={catalogScrollRef}
+          className="relative z-10 h-[507px] w-[1000px] overflow-x-hidden overflow-y-auto pt-[18px] flex flex-col items-center"
+          data-oid="uy6_dcp-wrapper">
+            <div
+            className="flex justify-center gap-[25px] mb-6"
+            data-oid="uy6_dcp">
+            <span
+            className="flex items-center"
+            style={{
+              color: "var(--, #101010)",
+              fontFamily: '"BIZ UDPGothic"',
+              fontSize: "32px",
+              fontStyle: "normal",
+              fontWeight: 700,
+              lineHeight: "normal",
+              letterSpacing: "1.664px"
+            }}
+            data-oid="catalog-page-label">
+              ページ
+            </span>
+            {[1, 2, 3, 4, 5].map((num) => {
+              const isActive = num === 1;
+              return (
+                <Button
+                  key={num}
+                  size="sm"
+                  variant="ghost"
+                  className="border border-transparent p-0"
+                  style={{
+                    display: "flex",
+                    width: "60px",
+                    height: "60px",
+                    padding: "14px 19px",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    flexShrink: 0,
+                    borderRadius: "20px",
+                    background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
+                    backgroundColor: isActive ? "#FDA900" : "#FFF",
+                    boxShadow: isActive ?
+                      "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
+                      "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+                    color: "var(--, #101010)",
+                    fontFamily: '"BIZ UDPGothic"',
+                    fontSize: "32px",
+                    fontStyle: "normal",
+                    fontWeight: 700,
+                    lineHeight: "normal",
+                    letterSpacing: "1.664px"
+                  }}
+                  data-oid="9r7o0ii">
+                    {num}
+                  </Button>
+              );
+            })}
+            <span className="text-sm self-center font-medium" data-oid="xd09rri">
+              ...
+            </span>
+            <Button
+            size="sm"
+            variant="ghost"
+            className="border border-transparent p-0"
+            style={{
+              display: "flex",
+              width: "60px",
+              height: "60px",
+              padding: "14px 19px",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "10px",
+              borderRadius: "20px",
+              background: "var(--, #FFF)",
+              backgroundColor: "#FFF",
+              boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+              color: "var(--, #101010)",
+              fontFamily: '"BIZ UDPGothic"',
+              fontSize: "32px",
+              fontStyle: "normal",
+              fontWeight: 700,
+              lineHeight: "normal",
+              letterSpacing: "1.664px"
+            }}
+            data-oid="f8qlkjv">
+              15
+            </Button>
+            </div>
+
+            <div
+            className="grid grid-cols-4 gap-y-4"
+            style={{
+              columnGap: "45px",
+              gridTemplateColumns: "repeat(4, 188px)",
+              justifyItems: "start"
+            }}
+            data-oid="h7qwqv1">
+            {products.map((product) =>
+          <Card
+            key={product.id}
+            className="px-4 pt-1 pb-0 bg-white border-2 border-[#e0e0e0] rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col"
+            style={{ width: "188px", height: "265px" }}
+            data-oid="3w-11ql">
+
+                <div className="flex justify-end mb-[3px]" data-oid="catalog-heart-row">
+                  <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="34"
+                height="31"
+                viewBox="0 0 34 31"
+                fill="none"
+                data-oid="eo3z5j5">
+                    <path
+                  d="M17 7.84292C17 7.84292 17 7.66699 15.7967 6.08366C14.4033 4.24699 12.345 2.91699 9.875 2.91699C5.9325 2.91699 2.75 6.09949 2.75 10.042C2.75 11.5145 3.19333 12.8762 3.95333 14.0003C5.23583 15.9162 17 28.2503 17 28.2503M17 7.84292C17 7.84292 17 7.66699 18.2033 6.08366C19.5967 4.24699 21.655 2.91699 24.125 2.91699C28.0675 2.91699 31.25 6.09949 31.25 10.042C31.25 11.5145 30.8067 12.8762 30.0467 14.0003C28.7642 15.9162 17 28.2503 17 28.2503"
+                  stroke="#209FDE"
+                  strokeWidth="3.86"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                  </svg>
+                </div>
+                <div
+                className="relative mb-[6.5px]"
+                style={{ height: "106px" }}
+                data-oid="8gipz64">
+                  <img
+                src={product.image || "/placeholder.svg"}
+                alt={product.name}
+                className="h-full w-full object-cover rounded-lg"
+                data-oid="q.-_y:_" />
+                </div>
+                <h4 className="text-sm font-bold" data-oid="d:mf1eo">
+                  {product.name}
+                </h4>
+                <p className="hidden" data-oid="ms.1o9h">
+                  {product.description}
+                </p>
+                <div
+              className="flex flex-col items-center"
+              data-oid="r7z2qp8">
+                <span
                 style={{
-                  display: "flex",
-                  width: "60px",
-                  height: "60px",
-                  padding: "14px 19px",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "10px",
-                  flexShrink: 0,
-                  borderRadius: "20px",
-                  background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
-                  backgroundColor: isActive ? "#FDA900" : "#FFF",
-                  boxShadow: isActive ?
-                    "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
-                    "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
                   color: "var(--, #101010)",
                   fontFamily: '"BIZ UDPGothic"',
-                  fontSize: "32px",
+                  fontSize: "20px",
                   fontStyle: "normal",
                   fontWeight: 700,
                   lineHeight: "normal",
-                  letterSpacing: "1.664px"
+                  letterSpacing: "1.04px",
+                  alignSelf: "flex-start",
+                  width: "100%",
+                  display: "block",
+                  marginTop: "12px"
                 }}
-                data-oid="9r7o0ii">
-
-                  {num}
-                </Button>
-            );
-          })}
-          <span className="text-sm self-center font-medium" data-oid="xd09rri">
-            ...
-          </span>
-          <Button
-          size="sm"
-          variant="ghost"
-          className="border border-transparent p-0"
-          style={{
-            display: "flex",
-            width: "60px",
-            height: "60px",
-            padding: "14px 19px",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "10px",
-            borderRadius: "20px",
-            background: "var(--, #FFF)",
-            backgroundColor: "#FFF",
-            boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
-            color: "var(--, #101010)",
-            fontFamily: '"BIZ UDPGothic"',
-            fontSize: "32px",
-            fontStyle: "normal",
-            fontWeight: 700,
-            lineHeight: "normal",
-            letterSpacing: "1.664px"
-          }}
-          data-oid="f8qlkjv">
-
-            15
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 mb-6" data-oid="h7qwqv1">
-          {products.map((product) =>
-        <Card
-          key={product.id}
-          className="p-4 bg-white border-2 border-[#e0e0e0] rounded-xl shadow-sm hover:shadow-md transition-shadow"
-          data-oid="3w-11ql">
-
-              <div className="relative mb-3" data-oid="8gipz64">
-                <img
-              src={product.image || "/placeholder.svg"}
-              alt={product.name}
-              className="w-full h-32 object-cover rounded-lg"
-              data-oid="q.-_y:_" />
-
-
-                <Heart
-              className="absolute top-2 right-2 text-[#209fde] fill-[#209fde]"
-              size={18}
-              data-oid="eo3z5j5" />
-
-              </div>
-              <h4 className="text-sm font-bold mb-1" data-oid="d:mf1eo">
-                {product.name}
-              </h4>
-              <p className="text-xs text-[#adadad] mb-3" data-oid="ms.1o9h">
-                {product.description}
-              </p>
-              <div
-            className="flex justify-between items-center"
-            data-oid="r7z2qp8">
-
-                <span
-              className="font-bold text-base text-[#209fde]"
-              data-oid="eq4gt6a">
-
-                  ¥{product.price}
-                </span>
-                <div className="flex items-center gap-2" data-oid="4z4g4a-">
-                  <Button
-                size="icon"
-                variant="outline"
-                className="w-7 h-7 border-2 border-[#209fde] rounded-md bg-white hover:bg-[#209fde]/10"
-                onClick={() => updateProductQuantity(product.id, -1)}
-                data-oid="les5kg0">
-
-                    <Minus
-                  size={12}
-                  className="text-[#209fde]"
-                  data-oid="d7ycg-q" />
-
-                  </Button>
-                  <span
-                className="text-sm w-6 text-center font-medium"
-                data-oid="f1loo1.">
-
-                    {product.quantity}
+                data-oid="eq4gt6a">
+                    ¥{product.price}
                   </span>
-                  <Button
-                size="icon"
-                variant="outline"
-                className="w-7 h-7 border-2 border-[#209fde] rounded-md bg-white hover:bg-[#209fde]/10"
-                onClick={() => updateProductQuantity(product.id, 1)}
-                data-oid=":--ycbg">
+                  <div className="mt-[12px] flex w-full items-center justify-center gap-2" data-oid="4z4g4a-">
+                    <Button
+                  size="icon"
+                  variant="ghost"
+                  className="w-7 h-7 rounded-md bg-transparent hover:bg-transparent"
+                  onClick={() => updateProductQuantity(product.id, -1)}
+                  data-oid="les5kg0">
+                      <Image
+                    src="/images/mainasu.png"
+                    alt="数量を減らす"
+                    width={28}
+                    height={28}
+                    className="h-full w-full object-contain"
+                    data-oid="d7ycg-q" />
 
-                    <Plus
-                  size={12}
-                  className="text-[#209fde]"
-                  data-oid="olbxiee" />
+                    </Button>
+                    <div
+                  className="flex items-center justify-center text-sm font-medium"
+                  style={{
+                    width: "73px",
+                    height: "26px",
+                    flexShrink: 0,
+                    borderRadius: "5px",
+                    border: "1px solid #FDA900",
+                    background: "#FFF"
+                  }}
+                  data-oid="f1loo1.">
+                      {product.quantity}
+                    </div>
+                    <Button
+                  size="icon"
+                  variant="ghost"
+                  className="w-7 h-7 rounded-md bg-transparent hover:bg-transparent"
+                  onClick={() => updateProductQuantity(product.id, 1)}
+                  data-oid=":--ycbg">
+                      <Image
+                    src="/images/plus.png"
+                    alt="数量を増やす"
+                    width={28}
+                    height={28}
+                    className="h-full w-full object-contain"
+                    data-oid="olbxiee" />
 
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Card>
-        )}
+              </Card>
+          )}
+            </div>
+          </div>
         </div>
 
         {/* Cart Summary */}
@@ -920,11 +1058,8 @@ export default function JapaneseFoodApp() {
         data-oid="t2ub1nx">
 
           <span className="text-base font-bold" data-oid="5rigjnl">
-            {cartItems.length}点 ¥
-            {cartItems.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          )}
+            {catalogQuantitySum}点 ¥
+            {catalogPriceSum}
           </span>
           <Button
           className="bg-white text-[#fda900] text-base font-bold px-8 h-11 border-2 border-white rounded-lg hover:bg-gray-50 shadow-sm"
@@ -973,29 +1108,46 @@ export default function JapaneseFoodApp() {
                     数量
                   </div>
                   <div className="flex items-center gap-1" data-oid="zdp13dt">
-                    <Button
+                  <Button
                   size="icon"
-                  variant="outline"
-                  className="w-5 h-5 border border-gray-300 rounded bg-transparent"
+                  variant="ghost"
+                  className="w-5 h-5 rounded bg-transparent"
                   onClick={() => updateQuantity(item.id, -1)}
                   data-oid="g4qqy_k">
-
-                      <Minus size={10} data-oid="2h.nwkc" />
+                      <Image
+                    src="/images/mainasu.png"
+                    alt="数量を減らす"
+                    width={20}
+                    height={20}
+                    className="h-full w-full object-contain"
+                    data-oid="2h.nwkc" />
                     </Button>
-                    <span
-                  className="text-xs w-4 text-center"
+                    <div
+                  className="flex items-center justify-center text-xs"
+                  style={{
+                    width: "73px",
+                    height: "26px",
+                    flexShrink: 0,
+                    borderRadius: "5px",
+                    border: "1px solid #FDA900",
+                    background: "#FFF"
+                  }}
                   data-oid="weymacu">
-
                       {item.quantity}
-                    </span>
+                    </div>
                     <Button
                   size="icon"
-                  variant="outline"
-                  className="w-5 h-5 border border-gray-300 rounded bg-transparent"
+                  variant="ghost"
+                  className="w-5 h-5 rounded bg-transparent"
                   onClick={() => updateQuantity(item.id, 1)}
                   data-oid="4kc4n3t">
-
-                      <Plus size={10} data-oid=".gef-yq" />
+                      <Image
+                    src="/images/plus.png"
+                    alt="数量を増やす"
+                    width={20}
+                    height={20}
+                    className="h-full w-full object-contain"
+                    data-oid=".gef-yq" />
                     </Button>
                   </div>
                 </div>
@@ -1276,12 +1428,399 @@ export default function JapaneseFoodApp() {
     </div>;
 
 
+  const CatalogLanding = () =>
+  <div
+    className="flex-1 bg-white p-6 ml-[232px] min-h-screen"
+    data-oid="catalog-landing">
+
+      <div className="mx-auto w-[1000px]">
+        <div className="relative mb-6" data-oid="catalog-landing-search">
+          <Search
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#fda900]"
+          size={18}
+          data-oid="catalog-landing-search-icon" />
+
+
+          <Input
+          placeholder="商品名で検索"
+          className="pl-12 h-12 border-2 border-[#fda900] text-sm rounded-lg bg-white shadow-sm focus:border-[#209fde] focus:ring-2 focus:ring-[#209fde]/20"
+          data-oid="catalog-landing-search-input" />
+
+        </div>
+
+        <div className="flex gap-[25px] mb-6" data-oid="catalog-landing-filters">
+          {FILTER_BUTTONS.map(({ label, buttonDataOid, textDataOid }) => (
+            <Button
+              key={`${label}-landing`}
+              variant="ghost"
+              className="border border-transparent p-0"
+              style={FILTER_BUTTON_INACTIVE_STYLE}
+              data-oid={`${buttonDataOid}-landing`}>
+              <span style={FILTER_BUTTON_TEXT_STYLE} data-oid={`${textDataOid}-landing`}>
+                {label}
+              </span>
+            </Button>
+          ))}
+        </div>
+
+        <div
+        className="relative mt-[23px] mb-[24px] w-[1000px]"
+        data-oid="catalog-landing-card-background">
+          <div
+          className="pointer-events-none absolute top-0 left-0 z-0 h-[507px] w-[1000px]"
+          style={{
+            borderRadius: "20px",
+            background: "rgba(253, 169, 0, 0.5)"
+          }}
+          aria-hidden="true"
+          />
+          <div
+          className="relative z-10 h-[507px] w-[1000px] overflow-hidden pt-[18px] flex flex-col items-center gap-[36px]"
+          data-oid="catalog-landing-pagination-wrapper">
+            <div
+            className="flex justify-center gap-[25px]"
+            data-oid="catalog-landing-pagination">
+            <span
+            className="flex items-center"
+            style={{
+              color: "var(--, #101010)",
+              fontFamily: '"BIZ UDPGothic"',
+              fontSize: "32px",
+              fontStyle: "normal",
+              fontWeight: 700,
+              lineHeight: "normal",
+              letterSpacing: "1.664px"
+            }}
+            data-oid="catalog-landing-page-label">
+              ページ
+            </span>
+            {[1, 2].map((num) => {
+              const isActive = num === landingPage;
+              return (
+                <Button
+                  key={`landing-page-${num}`}
+                  size="sm"
+                  variant="ghost"
+                  className="border border-transparent p-0"
+                  style={{
+                    display: "flex",
+                    width: "60px",
+                    height: "60px",
+                    padding: "14px 19px",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    flexShrink: 0,
+                    borderRadius: "20px",
+                    background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
+                    backgroundColor: isActive ? "#FDA900" : "#FFF",
+                    boxShadow: isActive ?
+                      "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
+                      "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+                    color: "var(--, #101010)",
+                    fontFamily: '"BIZ UDPGothic"',
+                    fontSize: "32px",
+                    fontStyle: "normal",
+                    fontWeight: 700,
+                    lineHeight: "normal",
+                    letterSpacing: "1.664px"
+                  }}
+                  onClick={() => setLandingPage(num)}
+                  data-oid={`catalog-landing-page-${num}`}>
+                    {num}
+                  </Button>
+              );
+            })}
+            </div>
+            <div
+            className="grid grid-cols-4"
+            style={{ gap: "45px" }}
+            data-oid="catalog-landing-card-grid">
+              {LANDING_CARD_CONTENT.map((card, index) => {
+                const Icon = card.renderIcon;
+                return (
+                  <div
+                    key={`landing-card-${index}`}
+                    className="relative flex h-[160px] w-[160px] flex-col items-center pt-[8.5px]"
+                    data-oid={`catalog-landing-card-${index}`}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="165"
+                      height="165"
+                      viewBox="0 0 165 165"
+                      fill="none"
+                      className="absolute inset-0"
+                      data-oid={`catalog-landing-card-svg-${index}`}>
+                      <g filter="url(#catalog-card-filter)">
+                        <rect width="160" height="160" rx="13.3333" fill="#FDA900" />
+                        <rect x="4.44434" y="4.44434" width="151.111" height="151.111" rx="10" fill="white" />
+                      </g>
+                      <defs>
+                        <filter id="catalog-card-filter" x="0" y="0" width="164.5" height="164.5" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                          <feOffset dx="4.5" dy="4.5" />
+                          <feComposite in2="hardAlpha" operator="out" />
+                          <feColorMatrix type="matrix" values="0 0 0 0 0.895207 0 0 0 0 0.887003 0 0 0 0 0.887003 0 0 0 1 0" />
+                          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3977_578" />
+                          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3977_578" result="shape" />
+                        </filter>
+                      </defs>
+                    </svg>
+                    <div
+                    className="relative z-10 flex h-full w-full flex-col items-center"
+                    data-oid={`catalog-landing-card-content-${index}`}>
+                      <span
+                      style={{
+                        color: "var(--, #101010)",
+                        fontFamily: '"BIZ UDPGothic"',
+                        fontSize: "24px",
+                        fontStyle: "normal",
+                        fontWeight: 700,
+                        lineHeight: "24px",
+                        letterSpacing: "1.248px"
+                      }}
+                      data-oid={`catalog-landing-card-title-${index}`}>
+                        {card.title}
+                      </span>
+                      <div className="flex w-full flex-1 items-center justify-center pt-[13px]">
+                        {Icon ? (
+                          <div
+                          className="flex h-[100px] w-[100px] items-center justify-center"
+                          data-oid={`catalog-landing-card-icon-${index}`}>
+                            <Icon />
+                          </div>
+                        ) : (
+                          <div
+                          className="h-[100px] w-[100px] rounded-lg border border-dashed border-[#cfcfcf] bg-[#f5f5f5]"
+                          data-oid={`catalog-landing-card-icon-${index}`}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>;
+
+
+  const Subscription = () =>
+  <div
+    className="flex-1 bg-white p-6 ml-[232px] relative min-h-screen"
+    data-oid="subscription-page">
+
+      <div
+      className="absolute right-0 top-0 bottom-0 w-1 bg-[#fda900]"
+      data-oid="subscription-accent">
+    </div>
+
+      <div className="mx-auto w-[1000px]" data-oid="subscription-content">
+        <div className="relative mb-6" data-oid="subscription-search">
+          <Search
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#fda900]"
+          size={18}
+          data-oid="subscription-search-icon" />
+
+
+          <Input
+          placeholder="商品名で検索"
+          className="pl-12 h-12 border-2 border-[#fda900] text-sm rounded-lg bg-white shadow-sm focus:border-[#209fde] focus:ring-2 focus:ring-[#209fde]/20"
+          data-oid="subscription-search-input" />
+
+        </div>
+
+        <div
+        className="relative mt-[23px] mb-[24px] w-[1000px]"
+        data-oid="subscription-card-background">
+          <div
+          className="pointer-events-none absolute top-0 left-0 z-0 h-[662px] w-[1000px]"
+          style={{
+            borderRadius: "20px",
+            background: "rgba(253, 169, 0, 0.5)"
+          }}
+          aria-hidden="true"
+          />
+          <div
+          ref={subscriptionScrollRef}
+          className="relative z-10 h-[662px] w-[1000px] overflow-x-hidden overflow-y-auto pt-[18px] flex flex-col items-center"
+          data-oid="subscription-card-wrapper">
+            <div
+            className="flex justify-center gap-[25px] mb-6"
+            data-oid="subscription-pagination">
+            {[1, 2, 3, 4, 5].map((num) => {
+              const isActive = num === 1;
+              return (
+                <Button
+                  key={`subscription-page-${num}`}
+                  size="sm"
+                  variant="ghost"
+                  className="border border-transparent p-0"
+                  style={{
+                    display: "flex",
+                    width: "60px",
+                    height: "60px",
+                    padding: "14px 19px",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    flexShrink: 0,
+                    borderRadius: "20px",
+                    background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
+                    backgroundColor: isActive ? "#FDA900" : "#FFF",
+                    boxShadow: isActive ?
+                      "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
+                      "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+                    color: "var(--, #101010)",
+                    fontFamily: '"BIZ UDPGothic"',
+                    fontSize: "32px",
+                    fontStyle: "normal",
+                    fontWeight: 700,
+                    lineHeight: "normal",
+                    letterSpacing: "1.664px"
+                  }}
+                  data-oid={`subscription-page-button-${num}`}>
+                    {num}
+                  </Button>
+              );
+            })}
+            <span className="text-sm self-center font-medium" data-oid="subscription-pagination-ellipsis">
+              ...
+            </span>
+            <Button
+            size="sm"
+            variant="ghost"
+            className="border border-transparent p-0"
+            style={{
+              display: "flex",
+              width: "60px",
+              height: "60px",
+              padding: "14px 19px",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "10px",
+              borderRadius: "20px",
+              background: "var(--, #FFF)",
+              backgroundColor: "#FFF",
+              boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+              color: "var(--, #101010)",
+              fontFamily: '"BIZ UDPGothic"',
+              fontSize: "32px",
+              fontStyle: "normal",
+              fontWeight: 700,
+              lineHeight: "normal",
+              letterSpacing: "1.664px"
+            }}
+            data-oid="subscription-pagination-last">
+              15
+            </Button>
+            </div>
+            <div
+            className="grid grid-cols-4 gap-y-4"
+            style={{
+              columnGap: "45px",
+              gridTemplateColumns: "repeat(4, 188px)",
+              justifyItems: "start"
+            }}
+            data-oid="subscription-card-grid">
+            {products.map((product) =>
+          <Card
+            key={`subscription-${product.id}`}
+            className="px-4 pt-1 pb-0 bg-white border-2 border-[#e0e0e0] rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col"
+            style={{ width: "188px", height: "265px" }}
+            data-oid="subscription-card">
+
+                <div className="flex justify-end mb-2" data-oid="subscription-heart-row">
+                  <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="34"
+                height="31"
+                viewBox="0 0 34 31"
+                fill="none"
+                data-oid="subscription-heart">
+                    <path
+                  d="M17 7.84292C17 7.84292 17 7.66699 15.7967 6.08366C14.4033 4.24699 12.345 2.91699 9.875 2.91699C5.9325 2.91699 2.75 6.09949 2.75 10.042C2.75 11.5145 3.19333 12.8762 3.95333 14.0003C5.23583 15.9162 17 28.2503 17 28.2503M17 7.84292C17 7.84292 17 7.66699 18.2033 6.08366C19.5967 4.24699 21.655 2.91699 24.125 2.91699C28.0675 2.91699 31.25 6.09949 31.25 10.042C31.25 11.5145 30.8067 12.8762 30.0467 14.0003C28.7642 15.9162 17 28.2503 17 28.2503"
+                  stroke="#209FDE"
+                  strokeWidth="3.86"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                  </svg>
+                </div>
+                <div
+                className="relative mb-[6.5px]"
+                style={{ height: "106px" }}
+                data-oid="subscription-image">
+                  <img
+                src={product.image || "/placeholder.svg"}
+                alt={product.name}
+                className="h-full w-full object-cover rounded-lg"
+                data-oid="subscription-image-img" />
+                </div>
+                <h4 className="text-sm font-bold" data-oid="subscription-name">
+                  {product.name}
+                </h4>
+                <p className="hidden" data-oid="subscription-description">
+                  {product.description}
+                </p>
+                <div
+              className="mt-auto flex flex-col gap-0"
+              data-oid="subscription-price-wrapper">
+                  <div
+                className="w-full"
+                style={{
+                  color: "var(--, #101010)",
+                  fontFamily: '"BIZ UDPGothic"',
+                  fontSize: "20px",
+                  fontStyle: "normal",
+                  fontWeight: 700,
+                  lineHeight: "normal",
+                  letterSpacing: "1.04px",
+                  marginTop: "12px"
+                }}
+                data-oid="subscription-price">
+                    ¥{product.price}
+                  </div>
+                  <div
+                className="flex w-full justify-center"
+                data-oid="subscription-favorite-wrapper">
+                    <Button
+                  variant="ghost"
+                  className="p-0 bg-transparent hover:bg-transparent"
+                  data-oid="subscription-favorite-button">
+                      <Image
+                    src="/images/favorite.png"
+                    alt="お気に入りに追加"
+                    width={152}
+                    height={36}
+                    className="h-[36px] w-[152px] object-contain"
+                    data-oid="subscription-favorite-img" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+          )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>;
+
+
   const renderScreen = () => {
     switch (currentScreen) {
       case "dashboard":
         return <Dashboard data-oid="ylfph:g" />;
       case "catalog":
         return <Catalog data-oid="wcl4:a0" />;
+      case "catalogLanding":
+        return <CatalogLanding data-oid="catalog-landing-screen" />;
       case "cart":
         return <Cart data-oid="13gj:ol" />;
       case "order":
@@ -1290,6 +1829,8 @@ export default function JapaneseFoodApp() {
         return <History data-oid="3.1vred" />;
       case "profile":
         return <Profile data-oid="faqj1gy" />;
+      case "subscription":
+        return <Subscription data-oid="subscription-screen" />;
       default:
         return <Dashboard data-oid="fntgw1v" />;
     }
