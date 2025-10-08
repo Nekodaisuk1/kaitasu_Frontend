@@ -61,6 +61,3 @@ export function History() {
     </div>
   );
 }
-
-
-  const Profile = () =>

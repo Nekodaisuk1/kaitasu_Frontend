@@ -209,6 +209,3 @@ export function CatalogLanding({
     </div>
   );
 }
-
-
-  const Subscription = () =>

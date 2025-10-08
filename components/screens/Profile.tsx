@@ -247,6 +247,3 @@ export function Profile({
     </div>
   );
 }
-
-
-  const CatalogLanding = () =>

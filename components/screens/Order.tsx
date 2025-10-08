@@ -116,6 +116,3 @@ export function Order({ onNavigate }: OrderProps) {
     </div>
   );
 }
-
-
-  const History = () =>

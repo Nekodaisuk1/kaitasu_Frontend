@@ -176,7 +176,7 @@ export function Subscription({ products, subscriptionScrollRef }: SubscriptionPr
                   {product.description}
                 </p>
                 <div
-              className="mt-auto flex flex-col gap-0"
+              className="flex flex-col gap-0"
               data-oid="subscription-price-wrapper">
                   <div
                 className="w-full"
@@ -188,7 +188,8 @@ export function Subscription({ products, subscriptionScrollRef }: SubscriptionPr
                   fontWeight: 700,
                   lineHeight: "normal",
                   letterSpacing: "1.04px",
-                  marginTop: "12px"
+                  marginTop: "12px",
+                  marginBottom: "4px"
                 }}
                 data-oid="subscription-price">
                     ¥{product.price}
@@ -220,6 +221,3 @@ export function Subscription({ products, subscriptionScrollRef }: SubscriptionPr
     </div>
   );
 }
-
-
-  const renderScreen = () => {

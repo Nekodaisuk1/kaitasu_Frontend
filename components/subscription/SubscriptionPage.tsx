@@ -173,7 +173,8 @@ const SubscriptionPage = ({ products, scrollRef }: SubscriptionPageProps) => (
                       fontWeight: 700,
                       lineHeight: "normal",
                       letterSpacing: "1.04px",
-                      marginTop: "12px"
+                      marginTop: "12px",
+                      marginBottom: "4px"
                     }}
                     data-oid="subscription-price">
                     ¥{product.price}
