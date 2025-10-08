@@ -39,8 +39,16 @@ export function SubscriptionAdd({ onNavigate, product }: SubscriptionAddProps) {
                 alignItems: "center"
               }}
             >
-              <div className="w-[80px] h-[80px] overflow-hidden rounded bg-white" data-oid="subscription-add-product-image">
-                <img src={product.image || "/placeholder.svg"} alt={product.name} className="w-full h-full object-cover" />
+              <div
+                className="overflow-hidden rounded bg-white"
+                style={{ width: "160px", height: "106.473px", flexShrink: 0 }}
+                data-oid="subscription-add-product-image"
+              >
+                <img
+                  src={product.image || "/placeholder.svg"}
+                  alt={product.name}
+                  style={{ width: "160px", height: "106.473px", aspectRatio: "160 / 106.473", objectFit: "cover", flexShrink: 0 }}
+                />
               </div>
               <div
                 style={{
