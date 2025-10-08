@@ -406,32 +406,6 @@ export default function JapaneseFoodApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("dashboard");
   const [hoveredNav, setHoveredNav] = useState<SidebarNavKey | null>(null);
   const [monthlyBudget, setMonthlyBudget] = useState(7500);
-const [cartItems, setCartItems] = useState<Product[]>([
-  {
-    id: 1,
-    name: "トップリブ 特製",
-    description: "ナンバー 260g",
-    price: 350,
-    image: "/images/food-item.jpg",
-    quantity: 1
-  },
-  {
-    id: 2,
-    name: "ビーフステーキ",
-    description: "プレミアム 300g",
-    price: 450,
-    image: "/images/food-item.jpg",
-    quantity: 1
-  },
-  {
-    id: 3,
-    name: "チキンカツ",
-    description: "ジューシー 200g",
-    price: 280,
-    image: "/images/food-item.jpg",
-    quantity: 1
-  }]
-  );
   const [products, setProducts] = useState<Product[]>(sampleProducts);
   const catalogScrollRef = useRef<HTMLDivElement | null>(null);
   const subscriptionScrollRef = useRef<HTMLDivElement | null>(null);
@@ -443,6 +417,10 @@ const [cartItems, setCartItems] = useState<Product[]>([
   const currentLandingCards = LANDING_CARD_CONTENT_PAGES[landingPageIndex] ?? [];
   const totalProfilePages = 2;
   const topButtonIconSize = 126;
+  const cartItems = useMemo(
+    () => products.filter((product) => product.quantity > 0),
+    [products]
+  );
   const catalogQuantitySum = useMemo(
     () => products.reduce((sum, product) => sum + product.quantity, 0),
     [products]
@@ -457,18 +435,6 @@ const [cartItems, setCartItems] = useState<Product[]>([
       setProfilePage(1);
     }
   }, [currentScreen, profilePage]);
-
-  const updateQuantity = (id: number, change: number) => {
-    setCartItems((items) =>
-    items.
-    map((item) =>
-    item.id === id ?
-    { ...item, quantity: Math.max(0, item.quantity + change) } :
-    item
-    ).
-    filter((item) => item.quantity > 0)
-    );
-  };
 
   const updateProductQuantity = (id: number, change: number) => {
     const activeScrollContainer = catalogScrollRef.current ?? subscriptionScrollRef.current;
@@ -491,21 +457,6 @@ const [cartItems, setCartItems] = useState<Product[]>([
       pendingProductScrollTop.current = null;
     }
   }, [products]);
-
-  const addToCart = (product: Product) => {
-    setCartItems((items) => {
-      const existingItem = items.find((item) => item.id === product.id);
-      if (existingItem) {
-        return items.map((item) =>
-        item.id === product.id ?
-        { ...item, quantity: item.quantity + product.quantity } :
-        item
-        );
-      } else {
-        return [...items, { ...product }];
-      }
-    });
-  };
 
   const Sidebar = () => {
     const renderSidebarButton = (
@@ -1120,7 +1071,17 @@ const [cartItems, setCartItems] = useState<Product[]>([
     </div>;
 
 
-  const Cart = () =>
+  const Cart = () => {
+    const totalCartQuantity = cartItems.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+    const totalCartPrice = cartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    return (
   <div className="flex-1 bg-white p-6 ml-[232px]" data-oid="qie1-gm">
       <div className="max-w-sm mx-auto" data-oid="-j93.-d">
         <h2 className="text-base font-bold mb-4" data-oid="gdwztq6">
@@ -1159,7 +1120,7 @@ const [cartItems, setCartItems] = useState<Product[]>([
                   size="icon"
                   variant="ghost"
                   className="w-5 h-5 rounded bg-transparent"
-                  onClick={() => updateQuantity(item.id, -1)}
+                  onClick={() => updateProductQuantity(item.id, -1)}
                   data-oid="g4qqy_k">
                       <Image
                     src="/images/mainasu.png"
@@ -1182,11 +1143,11 @@ const [cartItems, setCartItems] = useState<Product[]>([
                   data-oid="weymacu">
                       {item.quantity}
                     </div>
-                    <Button
+                  <Button
                   size="icon"
                   variant="ghost"
                   className="w-5 h-5 rounded bg-transparent"
-                  onClick={() => updateQuantity(item.id, 1)}
+                  onClick={() => updateProductQuantity(item.id, 1)}
                   data-oid="4kc4n3t">
                       <Image
                     src="/images/plus.png"
@@ -1216,13 +1177,10 @@ const [cartItems, setCartItems] = useState<Product[]>([
           className="flex justify-between text-base font-bold"
           data-oid="e-466ve">
 
-            <span data-oid="qr0:wva">合計 {cartItems.length}点</span>
+            <span data-oid="qr0:wva">合計 {totalCartQuantity}点</span>
             <span data-oid="5tmrc4s">
               ¥
-              {cartItems.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0
-            )}
+              {totalCartPrice}
             </span>
           </div>
         </div>
@@ -1245,7 +1203,9 @@ const [cartItems, setCartItems] = useState<Product[]>([
           </Button>
         </div>
       </div>
-    </div>;
+    </div>
+    );
+  };
 
 
   const Order = () =>
@@ -1429,11 +1389,12 @@ const [cartItems, setCartItems] = useState<Product[]>([
         data-oid="profile-main-card">
 
           <div className="flex items-center gap-3" data-oid="mhd5qso">
-            <div
-            className="w-12 h-12 bg-[#adadad] rounded-full"
-            data-oid="v96ohmr">
-          </div>
-            {profilePage === 1 && (
+            {profilePage === 1 ? (
+              <>
+                <div
+                className="w-12 h-12 bg-[#adadad] rounded-full"
+                data-oid="v96ohmr">
+              </div>
               <div data-oid="w32:5lp" className="flex items-center gap-4">
                 <div className="flex items-baseline gap-1" data-oid="2y3hjo1">
                   <span
@@ -1472,67 +1433,8 @@ const [cartItems, setCartItems] = useState<Product[]>([
                   </span>
                 </Button>
               </div>
-            )}
-          </div>
-
-          <div
-          className="flex flex-col items-center gap-[24px]"
-          data-oid="profile-pagination-wrapper">
-            <div
-            className="flex items-center justify-center gap-[25px]"
-            data-oid="profile-pagination">
-              <span
-              style={{
-                color: "var(--, #101010)",
-                fontFamily: '"BIZ UDPGothic"',
-                fontSize: "32px",
-                fontStyle: "normal",
-                fontWeight: 700,
-                lineHeight: "normal",
-                letterSpacing: "1.664px"
-              }}
-              data-oid="profile-page-label">
-                ページ
-              </span>
-              {Array.from({ length: totalProfilePages }, (_, i) => i + 1).map((num) => {
-                const isActive = num === profilePage;
-                return (
-                  <Button
-                    key={`profile-page-${num}`}
-                    size="sm"
-                    variant="ghost"
-                    className="border border-transparent p-0"
-                    style={{
-                      display: "flex",
-                      width: "60px",
-                      height: "60px",
-                      padding: "14px 19px",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: "10px",
-                      flexShrink: 0,
-                      borderRadius: "20px",
-                      background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
-                      backgroundColor: isActive ? "#FDA900" : "#FFF",
-                      boxShadow: isActive ?
-                        "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
-                        "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
-                      color: "var(--, #101010)",
-                      fontFamily: '"BIZ UDPGothic"',
-                      fontSize: "32px",
-                      fontStyle: "normal",
-                      fontWeight: 700,
-                      lineHeight: "normal",
-                      letterSpacing: "1.664px"
-                    }}
-                    onClick={() => setProfilePage(num)}
-                    data-oid={`profile-page-${num}`}>
-                    {num}
-                  </Button>
-                );
-              })}
-            </div>
+            </>
+            ) : null}
           </div>
 
           <div className="flex-1 w-full" data-oid="o4a2j0u">
@@ -1632,6 +1534,66 @@ const [cartItems, setCartItems] = useState<Product[]>([
                 </div>
               </div>
             )}
+          </div>
+
+          <div
+          className="mt-auto flex flex-col items-center gap-[24px]"
+          data-oid="profile-pagination-wrapper">
+            <div
+            className="flex items-center justify-center gap-[25px]"
+            data-oid="profile-pagination">
+              <span
+              style={{
+                color: "var(--, #101010)",
+                fontFamily: '"BIZ UDPGothic"',
+                fontSize: "32px",
+                fontStyle: "normal",
+                fontWeight: 700,
+                lineHeight: "normal",
+                letterSpacing: "1.664px"
+              }}
+              data-oid="profile-page-label">
+                ページ
+              </span>
+              {Array.from({ length: totalProfilePages }, (_, i) => i + 1).map((num) => {
+                const isActive = num === profilePage;
+                return (
+                  <Button
+                    key={`profile-page-${num}`}
+                    size="sm"
+                    variant="ghost"
+                    className="border border-transparent p-0"
+                    style={{
+                      display: "flex",
+                      width: "60px",
+                      height: "60px",
+                      padding: "14px 19px",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "10px",
+                      flexShrink: 0,
+                      borderRadius: "20px",
+                      background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
+                      backgroundColor: isActive ? "#FDA900" : "#FFF",
+                      boxShadow: isActive ?
+                        "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
+                        "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+                      color: "var(--, #101010)",
+                      fontFamily: '"BIZ UDPGothic"',
+                      fontSize: "32px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal",
+                      letterSpacing: "1.664px"
+                    }}
+                    onClick={() => setProfilePage(num)}
+                    data-oid={`profile-page-${num}`}>
+                    {num}
+                  </Button>
+                );
+              })}
+            </div>
           </div>
         </Card>
       </div>
