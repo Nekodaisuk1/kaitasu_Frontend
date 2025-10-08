@@ -12,9 +12,19 @@ type CartProps = {
   onUpdateProductQuantity: (id: number, change: number) => void;
 };
 
-export function Cart({ cartItems, onNavigate, onUpdateProductQuantity }: CartProps) {
-  const totalCartQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalCartPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+export function Cart({
+  cartItems,
+  onNavigate,
+  onUpdateProductQuantity,
+}: CartProps) {
+  const totalCartQuantity = cartItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
+  const totalCartPrice = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   return (
     <div className="flex-1 bg-white p-6 ml-[232px]" data-oid="qie1-gm">
@@ -28,15 +38,15 @@ export function Cart({ cartItems, onNavigate, onUpdateProductQuantity }: CartPro
             <Card
               key={item.id}
               className="p-3 bg-white border-2 border-gray-200 rounded-lg"
-              data-oid="5rgf5dd">
-
+              data-oid="5rgf5dd"
+            >
               <div className="flex items-center gap-3" data-oid=".a7yvq5">
                 <img
-              src={item.image || "/placeholder.svg"}
-              alt={item.name}
-              className="w-12 h-12 object-cover rounded"
-              data-oid="b0g5711" />
-
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.name}
+                  className="w-12 h-12 object-cover rounded"
+                  data-oid="b0g5711"
+                />
 
                 <div className="flex-1" data-oid="yd66:be">
                   <h4 className="text-sm font-medium" data-oid="5tlgvsv">
@@ -51,46 +61,51 @@ export function Cart({ cartItems, onNavigate, onUpdateProductQuantity }: CartPro
                     数量
                   </div>
                   <div className="flex items-center gap-1" data-oid="zdp13dt">
-                  <Button
-                  size="icon"
-                  variant="ghost"
-                  className="w-5 h-5 rounded bg-transparent"
-                  onClick={() => updateProductQuantity(item.id, -1)}
-                  data-oid="g4qqy_k">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="w-5 h-5 rounded bg-transparent"
+                      onClick={() => onUpdateProductQuantity(item.id, -1)}
+                      data-oid="g4qqy_k"
+                    >
                       <Image
-                    src="/images/mainasu.png"
-                    alt="数量を減らす"
-                    width={20}
-                    height={20}
-                    className="h-full w-full object-contain"
-                    data-oid="2h.nwkc" />
+                        src="/images/mainasu.png"
+                        alt="数量を減らす"
+                        width={20}
+                        height={20}
+                        className="h-full w-full object-contain"
+                        data-oid="2h.nwkc"
+                      />
                     </Button>
                     <div
-                  className="flex items-center justify-center text-xs"
-                  style={{
-                    width: "73px",
-                    height: "26px",
-                    flexShrink: 0,
-                    borderRadius: "5px",
-                    border: "1px solid #FDA900",
-                    background: "#FFF"
-                  }}
-                  data-oid="weymacu">
+                      className="flex items-center justify-center text-xs"
+                      style={{
+                        width: "73px",
+                        height: "26px",
+                        flexShrink: 0,
+                        borderRadius: "5px",
+                        border: "1px solid #FDA900",
+                        background: "#FFF",
+                      }}
+                      data-oid="weymacu"
+                    >
                       {item.quantity}
                     </div>
-                  <Button
-                  size="icon"
-                  variant="ghost"
-                  className="w-5 h-5 rounded bg-transparent"
-                  onClick={() => updateProductQuantity(item.id, 1)}
-                  data-oid="4kc4n3t">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="w-5 h-5 rounded bg-transparent"
+                      onClick={() => onUpdateProductQuantity(item.id, 1)}
+                      data-oid="4kc4n3t"
+                    >
                       <Image
-                    src="/images/plus.png"
-                    alt="数量を増やす"
-                    width={20}
-                    height={20}
-                    className="h-full w-full object-contain"
-                    data-oid=".gef-yq" />
+                        src="/images/plus.png"
+                        alt="数量を増やす"
+                        width={20}
+                        height={20}
+                        className="h-full w-full object-contain"
+                        data-oid=".gef-yq"
+                      />
                     </Button>
                   </div>
                 </div>
@@ -101,22 +116,19 @@ export function Cart({ cartItems, onNavigate, onUpdateProductQuantity }: CartPro
                 </div>
               </div>
             </Card>
-        )}
+          ))}
         </div>
 
         <div
-        className="border-t-2 border-gray-200 pt-4 mb-6"
-        data-oid="lx.9fs:">
-
+          className="border-t-2 border-gray-200 pt-4 mb-6"
+          data-oid="lx.9fs:"
+        >
           <div
-          className="flex justify-between text-base font-bold"
-          data-oid="e-466ve">
-
+            className="flex justify-between text-base font-bold"
+            data-oid="e-466ve"
+          >
             <span data-oid="qr0:wva">合計 {totalCartQuantity}点</span>
-            <span data-oid="5tmrc4s">
-              ¥
-              {totalCartPrice}
-            </span>
+            <span data-oid="5tmrc4s">¥{totalCartPrice}</span>
           </div>
         </div>
 
@@ -125,15 +137,15 @@ export function Cart({ cartItems, onNavigate, onUpdateProductQuantity }: CartPro
             variant="outline"
             className="flex-1 text-sm border-2 border-[#fda900] text-[#fda900] rounded-md bg-transparent"
             onClick={() => onNavigate("order")}
-            data-oid="8i_h.o.">
-
+            data-oid="8i_h.o."
+          >
             注文確認
           </Button>
           <Button
             className="flex-1 bg-[#fda900] text-sm border-2 border-[#fda900] rounded-md hover:bg-[#fda900]/90"
             onClick={() => onNavigate("catalog")}
-            data-oid="mgchczd">
-
+            data-oid="mgchczd"
+          >
             買い物を続ける
           </Button>
         </div>
@@ -141,6 +153,3 @@ export function Cart({ cartItems, onNavigate, onUpdateProductQuantity }: CartPro
     </div>
   );
 }
-
-
-  const Order = () =>
