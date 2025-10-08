@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useLayoutEffect, useMemo, type CSSProperties } from "react";
+import { useState, useRef, useLayoutEffect, useMemo, useEffect, type CSSProperties } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -114,7 +114,11 @@ const sampleProducts: Product[] = [
   quantity: 0
 }];
 
-const FILTER_BUTTONS = [
+const CATALOG_FILTER_BUTTONS = [
+  { label: "お気に入り", buttonDataOid: "jm:hia2", textDataOid: "btn-text-favorite" }
+];
+
+const LANDING_FILTER_BUTTONS = [
   { label: "健康重視", buttonDataOid: ".zvc9j.", textDataOid: "btn-text-health" },
   { label: "お気に入り", buttonDataOid: "jm:hia2", textDataOid: "btn-text-favorite" }
 ];
@@ -240,10 +244,11 @@ const LandingIconSeventh = () => (
 );
 
 /**
- * Update genre card titles/icons by editing LANDING_CARD_CONTENT.
+ * Update genre card titles/icons by editing LANDING_CARD_CONTENT_PAGES.
  * Use null for icon to keep the dashed placeholder.
  */
-const LANDING_CARD_CONTENT: LandingCardContent[] = [
+const LANDING_CARD_CONTENT_PAGES: LandingCardContent[][] = [
+[
   { title: "ジャンル 1", renderIcon: () => <LandingIconDefault /> },
   { title: "ジャンル 2", renderIcon: () => <LandingIconSecond /> },
   { title: "ジャンル 3", renderIcon: () => <LandingIconThird /> },
@@ -252,6 +257,13 @@ const LANDING_CARD_CONTENT: LandingCardContent[] = [
   { title: "ジャンル 6", renderIcon: () => <LandingIconSixth /> },
   { title: "ジャンル 7", renderIcon: () => <LandingIconSeventh /> },
   { title: "ジャンル 8" }
+],
+[
+  { title: "ジャンル 9" },
+  { title: "ジャンル 10" },
+  { title: "ジャンル 11" },
+  { title: "ジャンル 12" }
+]
 ];
 
 const SIDEBAR_ACTIVE_BG =
@@ -424,7 +436,12 @@ const [cartItems, setCartItems] = useState<Product[]>([
   const catalogScrollRef = useRef<HTMLDivElement | null>(null);
   const subscriptionScrollRef = useRef<HTMLDivElement | null>(null);
   const pendingProductScrollTop = useRef<number | null>(null);
+  const [profilePage, setProfilePage] = useState(1);
   const [landingPage, setLandingPage] = useState(1);
+  const totalLandingPages = LANDING_CARD_CONTENT_PAGES.length;
+  const landingPageIndex = Math.min(Math.max(landingPage - 1, 0), totalLandingPages - 1);
+  const currentLandingCards = LANDING_CARD_CONTENT_PAGES[landingPageIndex] ?? [];
+  const totalProfilePages = 2;
   const topButtonIconSize = 126;
   const catalogQuantitySum = useMemo(
     () => products.reduce((sum, product) => sum + product.quantity, 0),
@@ -434,6 +451,12 @@ const [cartItems, setCartItems] = useState<Product[]>([
     () => products.reduce((sum, product) => sum + product.quantity * product.price, 0),
     [products]
   );
+
+  useEffect(() => {
+    if (currentScreen !== "profile" && profilePage !== 1) {
+      setProfilePage(1);
+    }
+  }, [currentScreen, profilePage]);
 
   const updateQuantity = (id: number, change: number) => {
     setCartItems((items) =>
@@ -815,16 +838,40 @@ const [cartItems, setCartItems] = useState<Product[]>([
 
         </div>
 
-        <div className="flex gap-[25px] mb-6" data-oid="br-d9o3">
-          {FILTER_BUTTONS.map(({ label, buttonDataOid, textDataOid }) => (
+          <div className="flex gap-[25px] mb-6" data-oid="br-d9o3">
             <Button
-              key={label}
+              key="catalog-back-button"
               variant="ghost"
               className="border border-transparent p-0"
               style={FILTER_BUTTON_INACTIVE_STYLE}
-              data-oid={buttonDataOid}>
-              <span style={FILTER_BUTTON_TEXT_STYLE} data-oid={textDataOid}>
-                {label}
+              onClick={() => setCurrentScreen("catalogLanding")}
+              data-oid="catalog-back-button">
+              <span className="mr-3 flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 48 48"
+                  fill="none">
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M22.4404 3.42066C21.5311 3.42066 20.659 3.78188 20.016 4.42486C19.373 5.06785 19.0118 5.93992 19.0118 6.84923C19.0118 7.75854 19.373 8.63062 20.016 9.2736C20.659 9.91658 21.5311 10.2778 22.4404 10.2778H31.7935C34.1613 10.3239 36.4166 11.2969 38.0749 12.9877C39.7331 14.6786 40.662 16.9524 40.662 19.3207C40.662 21.6889 39.7331 23.9627 38.0749 25.6536C36.4166 27.3444 34.1613 28.3174 31.7935 28.3635H16.5158V22.4389C16.5157 21.7609 16.3145 21.0982 15.9377 20.5345C15.561 19.9708 15.0256 19.5315 14.3992 19.272C13.7728 19.0126 13.0835 18.9447 12.4186 19.0769C11.7536 19.2092 11.1427 19.5356 10.6632 20.0149L1.31694 29.3612C0.835444 29.8396 0.506738 30.45 0.372461 31.1153C0.238184 31.7806 0.304378 32.4707 0.562658 33.0984C0.729515 33.5098 0.978658 33.8835 1.31009 34.2195L10.6632 43.5727C11.1427 44.052 11.7536 44.3784 12.4186 44.5107C13.0835 44.6429 13.7728 44.575 14.3992 44.3156C15.0256 44.0561 15.561 43.6168 15.9377 43.0531C16.3145 42.4894 16.5157 41.8267 16.5158 41.1487V35.2207H31.7935C33.9012 35.2516 35.994 34.8632 37.9502 34.0781C39.9064 33.2929 41.687 32.1266 43.1884 30.6471C44.6898 29.1676 45.882 27.4043 46.6958 25.4599C47.5096 23.5154 47.9287 21.4286 47.9287 19.3207C47.9287 17.2128 47.5096 15.1259 46.6958 13.1814C45.882 11.237 44.6898 9.47372 43.1884 7.9942C41.687 6.51468 39.9064 5.34843 37.9502 4.56327C35.994 3.77811 33.9012 3.38971 31.7935 3.42066H22.4404Z"
+                    fill="#FDA900"
+                  />
+                </svg>
+              </span>
+              <span style={FILTER_BUTTON_TEXT_STYLE}>戻る</span>
+            </Button>
+            {CATALOG_FILTER_BUTTONS.map(({ label, buttonDataOid, textDataOid }) => (
+              <Button
+                key={label}
+                variant="ghost"
+                className="border border-transparent p-0"
+                style={FILTER_BUTTON_INACTIVE_STYLE}
+                data-oid={buttonDataOid}>
+                <span style={FILTER_BUTTON_TEXT_STYLE} data-oid={textDataOid}>
+                  {label}
               </span>
             </Button>
           ))}
@@ -1367,61 +1414,224 @@ const [cartItems, setCartItems] = useState<Product[]>([
 
   const Profile = () =>
   <div className="flex-1 bg-white p-6 ml-[232px]" data-oid="3pchgx4">
-      <div className="max-w-sm mx-auto space-y-4" data-oid=":530dgu">
-        <h2 className="text-base font-bold" data-oid="0a9t2n.">
-          マイページ
-        </h2>
+      <div className="flex flex-col items-center gap-4" data-oid=":530dgu">
 
         <Card
-        className="p-4 bg-white border-2 border-gray-200 rounded-lg"
-        data-oid="6:a7mk2">
+        className="flex flex-col gap-6 p-6"
+        style={{
+          width: "900px",
+          height: "633px",
+          flexShrink: 0,
+          borderRadius: "14.469px",
+          border: "5px solid #FDA900",
+          backgroundColor: "#FFF"
+        }}
+        data-oid="profile-main-card">
 
           <div className="flex items-center gap-3" data-oid="mhd5qso">
             <div
             className="w-12 h-12 bg-[#adadad] rounded-full"
             data-oid="v96ohmr">
           </div>
-            <div data-oid="w32:5lp">
-              <h3 className="font-medium text-sm" data-oid="2y3hjo1">
-                水口 和佳さん
-              </h3>
-              <Button
-              size="sm"
-              variant="outline"
-              className="text-xs border-2 border-gray-300 rounded-md bg-transparent"
-              data-oid="541gvwr">
+            {profilePage === 1 && (
+              <div data-oid="w32:5lp" className="flex items-center gap-4">
+                <div className="flex items-baseline gap-1" data-oid="2y3hjo1">
+                  <span
+                    style={{
+                      color: "var(--, #101010)",
+                      fontFamily: "BIZ UDPGothic",
+                      fontSize: "36px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal"
+                    }}
+                  >
+                    水口 和佳
+                  </span>
+                  <span
+                    style={{
+                      color: "var(--, #101010)",
+                      fontFamily: "BIZ UDPGothic",
+                      fontSize: "24px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal"
+                    }}
+                  >
+                    さん
+                  </span>
+                </div>
+                <Button
+                variant="ghost"
+                className="border border-transparent p-0"
+                style={FILTER_BUTTON_INACTIVE_STYLE}
+                data-oid="541gvwr">
 
-                名前を変更
-              </Button>
+                  <span style={FILTER_BUTTON_TEXT_STYLE}>
+                    名前を変更
+                  </span>
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div
+          className="flex flex-col items-center gap-[24px]"
+          data-oid="profile-pagination-wrapper">
+            <div
+            className="flex items-center justify-center gap-[25px]"
+            data-oid="profile-pagination">
+              <span
+              style={{
+                color: "var(--, #101010)",
+                fontFamily: '"BIZ UDPGothic"',
+                fontSize: "32px",
+                fontStyle: "normal",
+                fontWeight: 700,
+                lineHeight: "normal",
+                letterSpacing: "1.664px"
+              }}
+              data-oid="profile-page-label">
+                ページ
+              </span>
+              {Array.from({ length: totalProfilePages }, (_, i) => i + 1).map((num) => {
+                const isActive = num === profilePage;
+                return (
+                  <Button
+                    key={`profile-page-${num}`}
+                    size="sm"
+                    variant="ghost"
+                    className="border border-transparent p-0"
+                    style={{
+                      display: "flex",
+                      width: "60px",
+                      height: "60px",
+                      padding: "14px 19px",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "10px",
+                      flexShrink: 0,
+                      borderRadius: "20px",
+                      background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
+                      backgroundColor: isActive ? "#FDA900" : "#FFF",
+                      boxShadow: isActive ?
+                        "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
+                        "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+                      color: "var(--, #101010)",
+                      fontFamily: '"BIZ UDPGothic"',
+                      fontSize: "32px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal",
+                      letterSpacing: "1.664px"
+                    }}
+                    onClick={() => setProfilePage(num)}
+                    data-oid={`profile-page-${num}`}>
+                    {num}
+                  </Button>
+                );
+              })}
             </div>
           </div>
-        </Card>
 
-        <Card
-        className="p-4 bg-white border-2 border-gray-200 rounded-lg"
-        data-oid="o4a2j0u">
-
-          <h3 className="font-medium mb-3 text-sm" data-oid="xkxxiap">
-            予算設定
-          </h3>
-          <div className="space-y-3" data-oid="prr6v6o">
-            <div data-oid="zve5:m0">
-              <label className="text-sm block mb-1" data-oid="d68qzu_">
-                今月の予算
-              </label>
-              <div className="flex items-center gap-2" data-oid="lirbdor">
-                <span className="text-sm" data-oid="zr1baos">
-                  ¥
-                </span>
-                <Input
-                type="number"
-                value={monthlyBudget}
-                onChange={(e) => setMonthlyBudget(Number(e.target.value))}
-                className="flex-1 text-sm border-2 border-gray-300 rounded-md"
-                data-oid="_x89egx" />
-
+          <div className="flex-1 w-full" data-oid="o4a2j0u">
+            {profilePage === 1 ? (
+              <div className="space-y-6" data-oid="profile-page-one">
+                <div>
+                  <h3 className="font-medium mb-3 text-sm" data-oid="xkxxiap">
+                    予算設定
+                  </h3>
+                  <div className="space-y-3" data-oid="prr6v6o">
+                    <div data-oid="zve5:m0">
+                      <label className="text-sm block mb-1" data-oid="d68qzu_">
+                        今月の予算
+                      </label>
+                      <div className="flex items-center gap-2" data-oid="lirbdor">
+                        <span className="text-sm" data-oid="zr1baos">
+                          ¥
+                        </span>
+                        <Input
+                          type="number"
+                          value={monthlyBudget}
+                          onChange={(e) => setMonthlyBudget(Number(e.target.value))}
+                          className="flex-1 text-sm border-2 border-gray-300 rounded-md"
+                          data-oid="_x89egx"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-medium mb-3 text-sm" data-oid="calc-period-label">
+                    計算期間
+                  </h3>
+                  <div className="flex flex-wrap" style={{ gap: "37px" }} data-oid="calc-period-buttons">
+                    {[1, 2, 3, 4, 5, 6].map((num) => (
+                      <Button
+                        key={`calc-period-${num}`}
+                        variant="ghost"
+                        className="border border-transparent p-0"
+                        style={FILTER_BUTTON_INACTIVE_STYLE}
+                        data-oid={`calc-period-${num}`}>
+                        <span style={FILTER_BUTTON_TEXT_STYLE}>期間 {num}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                className="flex h-full items-start"
+                data-oid="profile-page-two">
+                <div className="flex flex-col items-start gap-8 w-full max-w-[520px]" data-oid="profile-page-two-content">
+                  <div className="flex flex-col items-start gap-6" data-oid="profile-page-two-subsection">
+                    <p
+                      style={{
+                        color: "var(--, #101010)",
+                        fontFamily: '"BIZ UDPGothic"',
+                        fontSize: "24px",
+                        fontStyle: "normal",
+                        fontWeight: 700,
+                        lineHeight: "normal",
+                        letterSpacing: "1.248px"
+                      }}
+                      data-oid="profile-page-two-title">
+                      定期購入の確認
+                    </p>
+                    <Button
+                      variant="ghost"
+                      className="border border-transparent p-0"
+                      style={FILTER_BUTTON_INACTIVE_STYLE}
+                      data-oid="profile-page-two-button">
+                      <span style={FILTER_BUTTON_TEXT_STYLE}>定期購入の確認</span>
+                    </Button>
+                  </div>
+                  <div className="flex flex-col items-start gap-6" data-oid="profile-page-two-favorite-subsection">
+                    <p
+                      style={{
+                        color: "var(--, #101010)",
+                        fontFamily: '"BIZ UDPGothic"',
+                        fontSize: "24px",
+                        fontStyle: "normal",
+                        fontWeight: 700,
+                        lineHeight: "normal",
+                        letterSpacing: "1.248px"
+                      }}
+                      data-oid="profile-page-two-favorite-title">
+                      お気に入り登録の確認
+                    </p>
+                    <Button
+                      variant="ghost"
+                      className="border border-transparent p-0"
+                      style={FILTER_BUTTON_INACTIVE_STYLE}
+                      data-oid="profile-page-two-favorite-button">
+                      <span style={FILTER_BUTTON_TEXT_STYLE}>お気に入り一覧へ</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
       </div>
@@ -1449,7 +1659,7 @@ const [cartItems, setCartItems] = useState<Product[]>([
         </div>
 
         <div className="flex gap-[25px] mb-6" data-oid="catalog-landing-filters">
-          {FILTER_BUTTONS.map(({ label, buttonDataOid, textDataOid }) => (
+          {LANDING_FILTER_BUTTONS.map(({ label, buttonDataOid, textDataOid }) => (
             <Button
               key={`${label}-landing`}
               variant="ghost"
@@ -1478,71 +1688,72 @@ const [cartItems, setCartItems] = useState<Product[]>([
           className="relative z-10 h-[507px] w-[1000px] overflow-hidden pt-[18px] flex flex-col items-center gap-[36px]"
           data-oid="catalog-landing-pagination-wrapper">
             <div
-            className="flex justify-center gap-[25px]"
+            className="flex items-center justify-center gap-[25px]"
             data-oid="catalog-landing-pagination">
-            <span
-            className="flex items-center"
-            style={{
-              color: "var(--, #101010)",
-              fontFamily: '"BIZ UDPGothic"',
-              fontSize: "32px",
-              fontStyle: "normal",
-              fontWeight: 700,
-              lineHeight: "normal",
-              letterSpacing: "1.664px"
-            }}
-            data-oid="catalog-landing-page-label">
-              ページ
-            </span>
-            {[1, 2].map((num) => {
-              const isActive = num === landingPage;
-              return (
-                <Button
-                  key={`landing-page-${num}`}
-                  size="sm"
-                  variant="ghost"
-                  className="border border-transparent p-0"
-                  style={{
-                    display: "flex",
-                    width: "60px",
-                    height: "60px",
-                    padding: "14px 19px",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "10px",
-                    flexShrink: 0,
-                    borderRadius: "20px",
-                    background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
-                    backgroundColor: isActive ? "#FDA900" : "#FFF",
-                    boxShadow: isActive ?
-                      "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
-                      "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
-                    color: "var(--, #101010)",
-                    fontFamily: '"BIZ UDPGothic"',
-                    fontSize: "32px",
-                    fontStyle: "normal",
-                    fontWeight: 700,
-                    lineHeight: "normal",
-                    letterSpacing: "1.664px"
-                  }}
-                  onClick={() => setLandingPage(num)}
-                  data-oid={`catalog-landing-page-${num}`}>
+              <span
+              style={{
+                color: "var(--, #101010)",
+                fontFamily: '"BIZ UDPGothic"',
+                fontSize: "32px",
+                fontStyle: "normal",
+                fontWeight: 700,
+                lineHeight: "normal",
+                letterSpacing: "1.664px"
+              }}
+              data-oid="catalog-landing-page-label">
+                ページ
+              </span>
+              {Array.from({ length: totalLandingPages }, (_, i) => i + 1).map((num) => {
+                const isActive = num === landingPage;
+                return (
+                  <Button
+                    key={`landing-page-${num}`}
+                    size="sm"
+                    variant="ghost"
+                    className="border border-transparent p-0"
+                    style={{
+                      display: "flex",
+                      width: "60px",
+                      height: "60px",
+                      padding: "14px 19px",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "10px",
+                      flexShrink: 0,
+                      borderRadius: "20px",
+                      background: isActive ? "var(--, #FDA900)" : "var(--, #FFF)",
+                      backgroundColor: isActive ? "#FDA900" : "#FFF",
+                      boxShadow: isActive ?
+                        "0 4px 4px 0 rgba(0, 0, 0, 0.25) inset" :
+                        "0 4px 4px 0 rgba(0, 0, 0, 0.25)",
+                      color: "var(--, #101010)",
+                      fontFamily: '"BIZ UDPGothic"',
+                      fontSize: "32px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal",
+                      letterSpacing: "1.664px"
+                    }}
+                    onClick={() => setLandingPage(num)}
+                    data-oid={`catalog-landing-page-${num}`}>
                     {num}
                   </Button>
-              );
-            })}
+                );
+              })}
             </div>
             <div
             className="grid grid-cols-4"
             style={{ gap: "45px" }}
             data-oid="catalog-landing-card-grid">
-              {LANDING_CARD_CONTENT.map((card, index) => {
+              {currentLandingCards.map((card, index) => {
                 const Icon = card.renderIcon;
                 return (
-                  <div
-                    key={`landing-card-${index}`}
-                    className="relative flex h-[160px] w-[160px] flex-col items-center pt-[8.5px]"
+                  <Button
+                    key={`landing-card-${landingPage}-${index}`}
+                    variant="ghost"
+                    className="relative flex h-[160px] w-[160px] flex-col items-center pt-[13px] border border-transparent p-0 transition-colors duration-200 hover:bg-[#fda900]/20"
+                    onClick={() => setCurrentScreen("catalog")}
                     data-oid={`catalog-landing-card-${index}`}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1569,8 +1780,8 @@ const [cartItems, setCartItems] = useState<Product[]>([
                       </defs>
                     </svg>
                     <div
-                    className="relative z-10 flex h-full w-full flex-col items-center"
-                    data-oid={`catalog-landing-card-content-${index}`}>
+                      className="relative z-10 flex h-full w-full flex-col items-center pt-[13px]"
+                      data-oid={`catalog-landing-card-content-${index}`}>
                       <span
                       style={{
                         color: "var(--, #101010)",
@@ -1599,7 +1810,7 @@ const [cartItems, setCartItems] = useState<Product[]>([
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Button>
                 );
               })}
             </div>
