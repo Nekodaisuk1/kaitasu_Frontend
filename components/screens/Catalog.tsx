@@ -338,6 +338,3 @@ export function Catalog({
     </div>
   );
 }
-
-
-  const Cart = () => {
