@@ -32,8 +32,10 @@ type JapaneseFoodAppState = {
   onNavigate: NavigateHandler;
   onPageChange: PageChangeHandler;
   onUpdateProductQuantity: UpdateProductQuantityHandler;
+  onSelectSubscriptionProduct: (product: Product) => void;
   profilePage: number;
   products: Product[];
+  selectedSubscriptionProduct: Product | null;
   subscriptionScrollRef: MutableRefObject<HTMLDivElement | null>;
   totalLandingPages: number;
   totalProfilePages: number;
@@ -51,6 +53,7 @@ export const useJapaneseFoodApp = (): JapaneseFoodAppState => {
   const pendingProductScrollTop = useRef<number | null>(null);
   const [profilePage, setProfilePage] = useState(1);
   const [landingPage, setLandingPage] = useState(1);
+  const [selectedSubscriptionProduct, setSelectedSubscriptionProduct] = useState<Product | null>(null);
 
   const totalLandingPages = LANDING_CARD_CONTENT_PAGES.length;
   const landingPageIndex = Math.min(Math.max(landingPage - 1, 0), totalLandingPages - 1);
@@ -116,6 +119,10 @@ export const useJapaneseFoodApp = (): JapaneseFoodAppState => {
     setLandingPage(page);
   };
 
+  const onSelectSubscriptionProduct = (product: Product) => {
+    setSelectedSubscriptionProduct(product);
+  };
+
   return {
     cartItems,
     catalogPriceSum,
@@ -132,8 +139,10 @@ export const useJapaneseFoodApp = (): JapaneseFoodAppState => {
     onNavigate,
     onPageChange,
     onUpdateProductQuantity,
+    onSelectSubscriptionProduct,
     profilePage,
     products,
+    selectedSubscriptionProduct,
     subscriptionScrollRef,
     totalLandingPages,
     totalProfilePages

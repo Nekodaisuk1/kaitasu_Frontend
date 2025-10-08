@@ -29,8 +29,10 @@ export const JapaneseFoodApp = () => {
     onNavigate,
     onPageChange,
     onUpdateProductQuantity,
+    onSelectSubscriptionProduct,
     profilePage,
     products,
+    selectedSubscriptionProduct,
     subscriptionScrollRef,
     totalLandingPages,
     totalProfilePages
@@ -89,11 +91,12 @@ export const JapaneseFoodApp = () => {
             products={products}
             subscriptionScrollRef={subscriptionScrollRef}
             onNavigate={onNavigate}
+            onSelectSubscriptionProduct={onSelectSubscriptionProduct}
           />
         );
       case "subscriptionAdd":
         return (
-          <SubscriptionAdd onNavigate={onNavigate} />
+          <SubscriptionAdd onNavigate={onNavigate} product={selectedSubscriptionProduct} />
         );
       default:
         return <Dashboard monthlyBudget={monthlyBudget} onNavigate={onNavigate} />;

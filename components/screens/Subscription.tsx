@@ -13,9 +13,10 @@ type SubscriptionProps = {
   products: Product[];
   subscriptionScrollRef: MutableRefObject<HTMLDivElement | null>;
   onNavigate: (screen: Screen) => void;
+  onSelectSubscriptionProduct: (product: Product) => void;
 };
 
-export function Subscription({ products, subscriptionScrollRef, onNavigate }: SubscriptionProps) {
+export function Subscription({ products, subscriptionScrollRef, onNavigate, onSelectSubscriptionProduct }: SubscriptionProps) {
   return (
     <div
       className="flex-1 bg-white p-6 ml-[232px] relative min-h-screen"
@@ -201,7 +202,7 @@ export function Subscription({ products, subscriptionScrollRef, onNavigate }: Su
                     <Button
                       variant="ghost"
                       className="p-0 bg-transparent hover:bg-transparent"
-                      onClick={() => onNavigate("subscriptionAdd")}
+                      onClick={() => { onSelectSubscriptionProduct(product); onNavigate("subscriptionAdd"); }}
                       data-oid="subscription-favorite-button">
                       <Image
                         src="/images/favorite.png"
