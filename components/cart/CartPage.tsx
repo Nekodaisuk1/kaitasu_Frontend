@@ -22,6 +22,7 @@ const CartPage = ({ cartItems, onUpdateQuantity, onNavigate }: CartPageProps) =>
           <Card
             key={item.id}
             className="p-3 bg-white border-2 border-gray-200 rounded-lg"
+            style={{ width: "970px", height: "111px" }}
             data-oid="5rgf5dd">
             <div className="flex items-center gap-3" data-oid=".a7yvq5">
               <img
@@ -34,9 +35,6 @@ const CartPage = ({ cartItems, onUpdateQuantity, onNavigate }: CartPageProps) =>
                 <h4 className="text-sm font-medium" data-oid="5tlgvsv">
                   {item.name}
                 </h4>
-                <p className="text-xs text-[#adadad]" data-oid="_b89cis">
-                  {item.description}
-                </p>
               </div>
               <div className="text-right" data-oid="f:g9-vr">
                 <div className="text-xs mb-1" data-oid="3_9wxay">
