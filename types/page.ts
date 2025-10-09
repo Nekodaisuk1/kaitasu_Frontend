@@ -8,7 +8,8 @@ export type Screen =
   | "profile"
   | "subscription"
   | "subscriptionAdd"
-  | "subscriptionList";
+  | "subscriptionList"
+  | "favoriteList";
 
 export type SidebarNavKey = Screen | "subscription";
 
@@ -41,4 +42,12 @@ export type SubscriptionEntry = {
   image: string;
   quantity: number;
   frequencyDays: number;
+};
+
+export type FavoriteEntry = {
+  productId: number;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
 };

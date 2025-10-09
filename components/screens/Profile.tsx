@@ -202,6 +202,7 @@ export function Profile({
                       variant="ghost"
                       className="border border-transparent p-0"
                       style={FILTER_BUTTON_INACTIVE_STYLE}
+                      onClick={() => onNavigate("favoriteList")}
                       data-oid="profile-page-two-favorite-button">
                       <span style={FILTER_BUTTON_TEXT_STYLE}>お気に入り一覧へ</span>
                     </Button>

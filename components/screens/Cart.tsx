@@ -10,12 +10,14 @@ type CartProps = {
   cartItems: Product[];
   onNavigate: (screen: Screen) => void;
   onUpdateProductQuantity: (id: number, change: number) => void;
+  onAddFavoriteEntry: (product: Product) => void;
 };
 
 export function Cart({
   cartItems,
   onNavigate,
   onUpdateProductQuantity,
+  onAddFavoriteEntry
 }: CartProps) {
   const totalCartQuantity = cartItems.reduce(
     (sum, item) => sum + item.quantity,
@@ -77,6 +79,7 @@ export function Cart({
                 <Button
                   variant="ghost"
                   className="flex items-center gap-2 border-2 border-[#FDA900] rounded-[11.936px] bg-white px-4 py-2 shadow-[2.686px_2.686px_0_0_#E4E2E2]"
+                  onClick={() => onAddFavoriteEntry(item)}
                   data-oid="cart-favorite-button">
                   <span
                     style={{

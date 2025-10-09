@@ -4,6 +4,7 @@ import { Catalog } from "@/components/screens/Catalog";
 import { CatalogLanding } from "@/components/screens/CatalogLanding";
 import { Cart } from "@/components/screens/Cart";
 import { Dashboard } from "@/components/screens/Dashboard";
+import { FavoriteList } from "@/components/screens/FavoriteList";
 import { History } from "@/components/screens/History";
 import { Order } from "@/components/screens/Order";
 import { Profile } from "@/components/screens/Profile";
@@ -33,13 +34,16 @@ export const JapaneseFoodApp = () => {
     onSelectSubscriptionProduct,
     onSaveSubscriptionEntry,
     onRemoveSubscriptionEntry,
+    onAddFavoriteEntry,
+    onRemoveFavoriteEntry,
     profilePage,
     products,
     selectedSubscriptionProduct,
     subscriptionScrollRef,
     totalLandingPages,
     totalProfilePages,
-    subscriptionEntries
+    subscriptionEntries,
+    favoriteEntries
   } = useJapaneseFoodApp();
 
   const renderScreen = () => {
@@ -63,6 +67,7 @@ export const JapaneseFoodApp = () => {
             cartItems={cartItems}
             onNavigate={onNavigate}
             onUpdateProductQuantity={onUpdateProductQuantity}
+            onAddFavoriteEntry={onAddFavoriteEntry}
           />
         );
       case "order":
@@ -113,6 +118,13 @@ export const JapaneseFoodApp = () => {
           <SubscriptionList
             entries={subscriptionEntries}
             onRemoveEntry={onRemoveSubscriptionEntry}
+          />
+        );
+      case "favoriteList":
+        return (
+          <FavoriteList
+            entries={favoriteEntries}
+            onRemoveEntry={onRemoveFavoriteEntry}
           />
         );
       default:
