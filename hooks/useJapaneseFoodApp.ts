@@ -84,11 +84,16 @@ export const useJapaneseFoodApp = (): JapaneseFoodAppState => {
       pendingProductScrollTop.current = activeScrollContainer.scrollTop;
     }
 
-    setProducts((items) =>
-      items.map((item) =>
+    setProducts((items) => {
+      const updatedItems = items.map((item) =>
         item.id === id ? { ...item, quantity: Math.max(0, item.quantity + change) } : item
-      )
-    );
+      );
+      const updatedProduct = updatedItems.find((item) => item.id === id) ?? null;
+      setSelectedSubscriptionProduct((prev) =>
+        prev && prev.id === id ? updatedProduct : prev
+      );
+      return updatedItems;
+    });
   };
 
   useLayoutEffect(() => {

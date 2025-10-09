@@ -96,7 +96,11 @@ export const JapaneseFoodApp = () => {
         );
       case "subscriptionAdd":
         return (
-          <SubscriptionAdd onNavigate={onNavigate} product={selectedSubscriptionProduct} />
+          <SubscriptionAdd
+            onNavigate={onNavigate}
+            onUpdateProductQuantity={onUpdateProductQuantity}
+            product={selectedSubscriptionProduct}
+          />
         );
       default:
         return <Dashboard monthlyBudget={monthlyBudget} onNavigate={onNavigate} />;

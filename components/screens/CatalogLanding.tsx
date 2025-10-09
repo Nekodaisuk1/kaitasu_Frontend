@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,14 @@ export function CatalogLanding({
   onNavigate,
   currentLandingCards
 }: CatalogLandingProps) {
+  const [selectedCards, setSelectedCards] = useState<number[]>([]);
+
+  const handleCardToggle = (index: number) => {
+    setSelectedCards((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
   return (
     <div
       className="flex-1 bg-white p-6 ml-[232px] min-h-screen"
@@ -137,12 +146,14 @@ export function CatalogLanding({
             data-oid="catalog-landing-card-grid">
               {currentLandingCards.map((card, index) => {
                 const Icon = card.renderIcon;
+                const isSelected = selectedCards.includes(index);
+
                 return (
                   <Button
                     key={`landing-card-${landingPage}-${index}`}
                     variant="ghost"
                     className="relative flex h-[160px] w-[160px] flex-col items-center pt-[13px] border border-transparent p-0 transition-colors duration-200 hover:bg-[#fda900]/20"
-                    onClick={() => onNavigate("catalog")}
+                    onClick={() => handleCardToggle(index)}
                     data-oid={`catalog-landing-card-${index}`}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -168,6 +179,36 @@ export function CatalogLanding({
                         </filter>
                       </defs>
                     </svg>
+                    {isSelected && (
+                      <div
+                        className="absolute inset-0 z-20 flex items-center justify-center"
+                        data-oid={`catalog-landing-card-selected-${index}`}>
+                        <div
+                          style={{
+                            width: "100px",
+                            height: "40px",
+                            flexShrink: 0,
+                            borderRadius: "10px",
+                            background: "#FDA900",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
+                          }}>
+                          <span
+                            style={{
+                              color: "#FFF",
+                              fontFamily: '"BIZ UDPGothic"',
+                              fontSize: "24px",
+                              fontStyle: "normal",
+                              fontWeight: 700,
+                              lineHeight: "normal",
+                              letterSpacing: "1.248px"
+                            }}>
+                            選択中
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     <div
                       className="relative z-10 flex h-full w-full flex-col items-center pt-[13px]"
                       data-oid={`catalog-landing-card-content-${index}`}>
@@ -205,6 +246,36 @@ export function CatalogLanding({
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-4 flex justify-end" data-oid="catalog-landing-next-wrapper">
+        <Button
+          variant="ghost"
+          className="border border-transparent p-0"
+          style={{
+            borderRadius: "20px",
+            border: "3px solid #FDA900",
+            background: "#FFF",
+            boxShadow: "4.5px 4.5px 0 0 #E4E2E2",
+            width: "150px",
+            height: "60px",
+            flexShrink: 0
+          }}
+          onClick={() => onNavigate("catalog")}
+          data-oid="catalog-landing-next-button">
+          <span
+            style={{
+              color: "#000",
+              fontFamily: '"BIZ UDPGothic"',
+              fontSize: "32px",
+              fontStyle: "normal",
+              fontWeight: 700,
+              lineHeight: "normal",
+              letterSpacing: "1.664px"
+            }}>
+            次へ
+          </span>
+        </Button>
       </div>
     </div>
   );

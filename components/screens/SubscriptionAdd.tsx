@@ -21,8 +21,6 @@ export function SubscriptionAdd({ onNavigate, onUpdateProductQuantity, product }
   return (
     <div className="flex-1 bg-white p-6 ml-[232px] min-h-screen" data-oid="subscription-add-page">
       <div className="mx-auto w-[903px]">
-        <h1 className="text-base font-bold">定期購入に商品を追加</h1>
-        <p className="text-sm text-[#adadad] mt-2">このページの内容は後で追加します。</p>
 
         {/* オレンジ色の四角（外枠） */}
         <div className="mt-4 flex w-full justify-center" data-oid="subscription-add-frame-wrapper">
@@ -40,7 +38,7 @@ export function SubscriptionAdd({ onNavigate, onUpdateProductQuantity, product }
           >
           {/* 先ほど追加したセクション（内側のオレンジは削除し、内容のみ配置） */}
           {product ? (
-            <div className="flex flex-col items-center" style={{ gap: "24px" }}>
+            <div className="flex flex-col items-center" style={{ gap: "30px" }}>
               <div
                 data-oid="subscription-add-product-row"
                 style={{
@@ -300,23 +298,46 @@ export function SubscriptionAdd({ onNavigate, onUpdateProductQuantity, product }
                   width: "768px",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginTop: "36px"
+                  gap: "18px"
                 }}
                 data-oid="subscription-add-action-row"
               >
                 <Button
                   variant="ghost"
                   className="border border-transparent p-0"
-                  style={ACTION_BUTTON_STYLE}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "78px",
+                    padding: "21px 22px",
+                    borderRadius: "18.5px",
+                    border: "3px solid #ADADAD",
+                    background: "#FFF",
+                    boxSizing: "border-box",
+                    filter: "drop-shadow(4.5px 4.5px 0 #E4E2E2)"
+                  }}
                   onClick={() => onNavigate("subscription")}
                   data-oid="subscription-add-action-cancel"
                 >
-                  <span style={ACTION_BUTTON_TEXT_STYLE}>キャンセル</span>
+                  <span
+                    style={{
+                      ...ACTION_BUTTON_TEXT_STYLE,
+                      lineHeight: "normal"
+                    }}
+                  >
+                    キャンセル
+                  </span>
                 </Button>
                 <Button
                   variant="ghost"
                   className="border border-transparent p-0"
-                  style={ACTION_BUTTON_STYLE}
+                  style={{
+                    ...ACTION_BUTTON_STYLE,
+                    borderRadius: "20px",
+                    border: "3px solid #FDA900",
+                    boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
+                  }}
                   onClick={() => onNavigate("subscription")}
                   data-oid="subscription-add-action-list"
                 >
@@ -325,7 +346,12 @@ export function SubscriptionAdd({ onNavigate, onUpdateProductQuantity, product }
                 <Button
                   variant="ghost"
                   className="border border-transparent p-0"
-                  style={ACTION_BUTTON_STYLE}
+                  style={{
+                    ...ACTION_BUTTON_STYLE,
+                    borderRadius: "20px",
+                    border: "3px solid #FDA900",
+                    boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
+                  }}
                   data-oid="subscription-add-action-save"
                 >
                   <span style={ACTION_BUTTON_TEXT_STYLE}>保存して登録</span>
@@ -338,15 +364,6 @@ export function SubscriptionAdd({ onNavigate, onUpdateProductQuantity, product }
           </div>
         </div>
 
-        <div className="mt-4">
-          <Button
-            variant="outline"
-            className="border-2 border-[#fda900] text-[#fda900]"
-            onClick={() => onNavigate("subscription")}
-            data-oid="subscription-add-back">
-            定期購入ページに戻る
-          </Button>
-        </div>
       </div>
     </div>
   );
@@ -357,9 +374,10 @@ const ACTION_BUTTON_STYLE = {
   justifyContent: "center",
   width: "max-content",
   minWidth: "160px",
-  height: "60px",
-  padding: "0 24px",
+  height: "78px",
+  padding: "21px 22px",
   flexShrink: 0,
+  boxSizing: "border-box" as const,
   borderRadius: "20px",
   border: "2px solid #FDA900",
   background: "var(--, #FFF)",
