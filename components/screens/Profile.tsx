@@ -91,14 +91,22 @@ export function Profile({
             {profilePage === 1 ? (
               <div className="space-y-6" data-oid="profile-page-one">
                 <div>
-                  <h3 className="font-medium mb-3 text-sm" data-oid="xkxxiap">
-                    予算設定
+                  <h3
+                    className="mb-3"
+                    style={{
+                      color: "var(--, #101010)",
+                      fontFamily: '"BIZ UDPGothic"',
+                      fontSize: "36px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal",
+                      letterSpacing: "1.872px"
+                    }}
+                    data-oid="xkxxiap">
+                    今月の予算
                   </h3>
                   <div className="space-y-3" data-oid="prr6v6o">
                     <div data-oid="zve5:m0">
-                      <label className="text-sm block mb-1" data-oid="d68qzu_">
-                        今月の予算
-                      </label>
                       <div className="flex items-center gap-2" data-oid="lirbdor">
                         <span className="text-sm" data-oid="zr1baos">
                           ¥
@@ -115,18 +123,34 @@ export function Profile({
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-medium mb-3 text-sm" data-oid="calc-period-label">
+                  <h3
+                    className="mb-3"
+                    style={{
+                      color: "var(--, #101010)",
+                      fontFamily: '"BIZ UDPGothic"',
+                      fontSize: "36px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal",
+                      letterSpacing: "1.872px"
+                    }}
+                    data-oid="calc-period-label">
                     計算期間
                   </h3>
                   <div className="flex flex-wrap" style={{ gap: "37px" }} data-oid="calc-period-buttons">
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
+                    {[1, 5, 10, 15, 20, 25].map((num) => (
                       <Button
                         key={`calc-period-${num}`}
                         variant="ghost"
                         className="border border-transparent p-0"
-                        style={FILTER_BUTTON_INACTIVE_STYLE}
+                        style={{
+                          ...FILTER_BUTTON_INACTIVE_STYLE,
+                          width: "180px",
+                          minWidth: "180px",
+                          height: "63px"
+                        }}
                         data-oid={`calc-period-${num}`}>
-                        <span style={FILTER_BUTTON_TEXT_STYLE}>期間 {num}</span>
+                        <span style={FILTER_BUTTON_TEXT_STYLE}> 毎月{num}日</span>
                       </Button>
                     ))}
                   </div>

@@ -137,7 +137,7 @@ export function Cart({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="rounded bg-transparent"
+                      className="rounded bg-transparent hover:bg-transparent focus:bg-transparent focus-visible:bg-transparent active:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
                       style={{ width: "41px", height: "40px", flexShrink: 0 }}
                       onClick={() => onUpdateProductQuantity(item.id, -1)}
                       data-oid="g4qqy_k"
@@ -171,7 +171,7 @@ export function Cart({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="rounded bg-transparent"
+                      className="rounded bg-transparent hover:bg-transparent focus:bg-transparent focus-visible:bg-transparent active:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
                       style={{ width: "41px", height: "40px", flexShrink: 0 }}
                       onClick={() => onUpdateProductQuantity(item.id, 1)}
                       data-oid="4kc4n3t"
