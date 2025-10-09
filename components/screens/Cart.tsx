@@ -37,79 +37,168 @@ export function Cart({
           {cartItems.map((item) => (
             <Card
               key={item.id}
-              className="p-3 bg-white border-2 border-gray-200 rounded-lg"
+              className="bg-white border-2 border-gray-200 rounded-lg"
               data-oid="5rgf5dd"
             >
-              <div className="flex items-center gap-3" data-oid=".a7yvq5">
+              <div className="flex items-center gap-[20px] px-4 py-4" data-oid=".a7yvq5">
                 <img
                   src={item.image || "/placeholder.svg"}
                   alt={item.name}
-                  className="w-12 h-12 object-cover rounded"
+                  className="object-cover rounded"
+                  style={{
+                    width: "164.548px",
+                    height: "109px",
+                    flexShrink: 0,
+                    aspectRatio: "164.55 / 109.00"
+                  }}
                   data-oid="b0g5711"
                 />
 
-                <div className="flex-1" data-oid="yd66:be">
-                  <h4 className="text-sm font-medium" data-oid="5tlgvsv">
+                <div className="flex-1 min-w-0" data-oid="yd66:be">
+                  <h4
+                    style={{
+                      color: "var(--, #101010)",
+                      fontFamily: '"BIZ UDPGothic"',
+                      fontSize: "24px",
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal",
+                      letterSpacing: "1.248px",
+                      width: "208px"
+                    }}
+                    className="truncate"
+                    data-oid="5tlgvsv">
                     {item.name}
                   </h4>
                 </div>
-                <div className="text-right" data-oid="f:g9-vr">
-                  <div className="text-xs mb-1" data-oid="3_9wxay">
-                    数量
-                  </div>
-                  <div className="flex items-center gap-1" data-oid="zdp13dt">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="w-5 h-5 rounded bg-transparent"
-                      onClick={() => onUpdateProductQuantity(item.id, -1)}
-                      data-oid="g4qqy_k"
-                    >
-                      <Image
-                        src="/images/mainasu.png"
-                        alt="数量を減らす"
-                        width={20}
-                        height={20}
-                        className="h-full w-full object-contain"
-                        data-oid="2h.nwkc"
-                      />
-                    </Button>
-                    <div
-                      className="flex items-center justify-center text-xs"
+                <div
+                  className="ml-auto flex items-center gap-[20px] pr-[62px]"
+                  data-oid="cart-right-group">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 border-2 border-[#FDA900] rounded-[11.936px] bg-white px-4 py-2 shadow-[2.686px_2.686px_0_0_#E4E2E2]"
+                    data-oid="cart-favorite-button">
+                    <span
                       style={{
-                        width: "73px",
-                        height: "26px",
-                        flexShrink: 0,
-                        borderRadius: "5px",
-                        border: "1px solid #FDA900",
-                        background: "#FFF",
+                        color: "#000",
+                        fontFamily: '"BIZ UDPGothic"',
+                        fontSize: "19.098px",
+                        fontStyle: "normal",
+                        fontWeight: 700,
+                        lineHeight: "normal",
+                        letterSpacing: "0.993px"
                       }}
-                      data-oid="weymacu"
-                    >
-                      {item.quantity}
+                      data-oid="cart-favorite-text">
+                      お気に入りに追加
+                    </span>
+                    <div
+                      style={{
+                        width: "25px",
+                        height: "25px",
+                        borderRadius: "6px",
+                        background: "#FFF"
+                      }}
+                      data-oid="cart-favorite-icon">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="22"
+                        height="20"
+                        viewBox="0 0 22 20"
+                        fill="none">
+                        <path
+                          d="M11.2666 5.29155C11.2666 5.29155 11.2666 5.17797 10.4897 4.15576C9.59015 2.96999 8.26127 2.11133 6.66662 2.11133C4.1213 2.11133 2.06665 4.16598 2.06665 6.7113C2.06665 7.66196 2.35287 8.54106 2.84353 9.26683C3.67153 10.5037 11.2666 18.4668 11.2666 18.4668M11.2666 5.29155C11.2666 5.29155 11.2666 5.17797 12.0435 4.15576C12.943 2.96999 14.2719 2.11133 15.8666 2.11133C18.4119 2.11133 20.4665 4.16598 20.4665 6.7113C20.4665 7.66196 20.1803 8.54106 19.6896 9.26683C18.8616 10.5037 11.2666 18.4668 11.2666 18.4668"
+                          stroke="#209FDE"
+                          strokeWidth="2.30369"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="w-5 h-5 rounded bg-transparent"
-                      onClick={() => onUpdateProductQuantity(item.id, 1)}
-                      data-oid="4kc4n3t"
-                    >
-                      <Image
-                        src="/images/plus.png"
-                        alt="数量を増やす"
-                        width={20}
-                        height={20}
-                        className="h-full w-full object-contain"
-                        data-oid=".gef-yq"
-                      />
-                    </Button>
+                  </Button>
+                  <div className="flex flex-col items-center gap-1" data-oid="f:g9-vr">
+                    <span
+                      style={{
+                        color: "var(--, #101010)",
+                        textAlign: "center",
+                        fontFamily: '"BIZ UDPGothic"',
+                        fontSize: "24px",
+                        fontStyle: "normal",
+                        fontWeight: 700,
+                        lineHeight: "150%",
+                        letterSpacing: "1.248px"
+                      }}
+                      data-oid="3_9wxay">
+                      数量
+                    </span>
+                    <div className="flex items-center gap-1" data-oid="zdp13dt">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="rounded bg-transparent"
+                        style={{ width: "41px", height: "40px", flexShrink: 0 }}
+                        onClick={() => onUpdateProductQuantity(item.id, -1)}
+                        data-oid="g4qqy_k"
+                      >
+                        <Image
+                          src="/images/mainasu.png"
+                          alt="数量を減らす"
+                          width={20}
+                          height={20}
+                          className="h-full w-full object-contain"
+                          data-oid="2h.nwkc"
+                        />
+                      </Button>
+                      <div
+                        className="flex items-center justify-center"
+                        style={{
+                          minWidth: "73px",
+                          height: "40px",
+                          color: "var(--, #101010)",
+                          textAlign: "center",
+                          fontFamily: '"BIZ UDPGothic"',
+                          fontSize: "24px",
+                          fontStyle: "normal",
+                          fontWeight: 700,
+                          lineHeight: "150%",
+                          letterSpacing: "1.248px"
+                        }}
+                        data-oid="weymacu">
+                        {item.quantity}
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="rounded bg-transparent"
+                        style={{ width: "41px", height: "40px", flexShrink: 0 }}
+                        onClick={() => onUpdateProductQuantity(item.id, 1)}
+                        data-oid="4kc4n3t"
+                      >
+                        <Image
+                          src="/images/plus.png"
+                          alt="数量を増やす"
+                          width={20}
+                          height={20}
+                          className="h-full w-full object-contain"
+                          data-oid=".gef-yq"
+                        />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="text-right" data-oid="8ke_pvk">
-                  <span className="font-bold text-sm" data-oid="jo1znli">
-                    ¥{item.price}
-                  </span>
+                  <div className="text-right" data-oid="8ke_pvk">
+                    <span
+                      style={{
+                        color: "var(--, #101010)",
+                        fontFamily: '"BIZ UDPGothic"',
+                        fontSize: "24px",
+                        fontStyle: "normal",
+                        fontWeight: 700,
+                        lineHeight: "normal",
+                        letterSpacing: "1.248px"
+                      }}
+                      data-oid="jo1znli">
+                      ¥{item.price}
+                    </span>
+                  </div>
                 </div>
               </div>
             </Card>
