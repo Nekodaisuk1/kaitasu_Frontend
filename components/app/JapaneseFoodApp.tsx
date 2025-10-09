@@ -10,6 +10,7 @@ import { Profile } from "@/components/screens/Profile";
 import { Sidebar } from "@/components/screens/Sidebar";
 import { Subscription } from "@/components/screens/Subscription";
 import { SubscriptionAdd } from "@/components/screens/SubscriptionAdd";
+import { SubscriptionList } from "@/components/screens/SubscriptionList";
 import { useJapaneseFoodApp } from "@/hooks/useJapaneseFoodApp";
 
 export const JapaneseFoodApp = () => {
@@ -30,12 +31,15 @@ export const JapaneseFoodApp = () => {
     onPageChange,
     onUpdateProductQuantity,
     onSelectSubscriptionProduct,
+    onSaveSubscriptionEntry,
+    onRemoveSubscriptionEntry,
     profilePage,
     products,
     selectedSubscriptionProduct,
     subscriptionScrollRef,
     totalLandingPages,
-    totalProfilePages
+    totalProfilePages,
+    subscriptionEntries
   } = useJapaneseFoodApp();
 
   const renderScreen = () => {
@@ -73,6 +77,7 @@ export const JapaneseFoodApp = () => {
             onPageChange={onPageChange}
             monthlyBudget={monthlyBudget}
             onMonthlyBudgetChange={onMonthlyBudgetChange}
+            onNavigate={onNavigate}
           />
         );
       case "catalogLanding":
@@ -99,7 +104,15 @@ export const JapaneseFoodApp = () => {
           <SubscriptionAdd
             onNavigate={onNavigate}
             onUpdateProductQuantity={onUpdateProductQuantity}
+            onSaveSubscriptionEntry={onSaveSubscriptionEntry}
             product={selectedSubscriptionProduct}
+          />
+        );
+      case "subscriptionList":
+        return (
+          <SubscriptionList
+            entries={subscriptionEntries}
+            onRemoveEntry={onRemoveSubscriptionEntry}
           />
         );
       default:

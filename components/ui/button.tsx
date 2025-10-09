@@ -20,7 +20,7 @@ const getVariantClasses = (variant: ButtonProps["variant"] = "default") => {
     "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
     secondary:
     "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-    ghost: "hover:bg-accent hover:text-accent-foreground",
+    ghost: "hover:bg-accent hover:text-[#fda900]",
     link: "text-primary underline-offset-4 hover:underline"
   };
   return variants[variant];

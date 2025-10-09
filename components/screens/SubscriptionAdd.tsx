@@ -3,19 +3,43 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { Product, Screen } from "@/types/page";
+import type { Product, Screen, SubscriptionEntry } from "@/types/page";
 
 type SubscriptionAddProps = {
   onNavigate: (screen: Screen) => void;
   onUpdateProductQuantity: (id: number, change: number) => void;
+  onSaveSubscriptionEntry: (entry: SubscriptionEntry) => void;
   product: Product | null;
 };
 
-export function SubscriptionAdd({ onNavigate, onUpdateProductQuantity, product }: SubscriptionAddProps) {
+export function SubscriptionAdd({
+  onNavigate,
+  onUpdateProductQuantity,
+  onSaveSubscriptionEntry,
+  product
+}: SubscriptionAddProps) {
   const [deliveryFrequency, setDeliveryFrequency] = useState(1);
 
   const handleFrequencyChange = (change: number) => {
     setDeliveryFrequency((prev) => Math.max(1, prev + change));
+  };
+
+  const handleSave = () => {
+    if (!product) {
+      return;
+    }
+
+    onSaveSubscriptionEntry({
+      id: product.id,
+      productId: product.id,
+      name: product.name,
+      price: product.price * product.quantity,
+      image: product.image,
+      quantity: product.quantity,
+      frequencyDays: deliveryFrequency
+    });
+    setDeliveryFrequency(1);
+    onNavigate("subscriptionList");
   };
 
   return (
@@ -338,7 +362,7 @@ export function SubscriptionAdd({ onNavigate, onUpdateProductQuantity, product }
                     border: "3px solid #FDA900",
                     boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
                   }}
-                  onClick={() => onNavigate("subscription")}
+                  onClick={() => onNavigate("subscriptionList")}
                   data-oid="subscription-add-action-list"
                 >
                   <span style={ACTION_BUTTON_TEXT_STYLE}>定期購入一覧へ</span>
@@ -352,6 +376,7 @@ export function SubscriptionAdd({ onNavigate, onUpdateProductQuantity, product }
                     border: "3px solid #FDA900",
                     boxShadow: "4.5px 4.5px 0 0 #E4E2E2"
                   }}
+                  onClick={handleSave}
                   data-oid="subscription-add-action-save"
                 >
                   <span style={ACTION_BUTTON_TEXT_STYLE}>保存して登録</span>

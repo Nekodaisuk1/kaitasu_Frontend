@@ -52,9 +52,6 @@ export function Cart({
                   <h4 className="text-sm font-medium" data-oid="5tlgvsv">
                     {item.name}
                   </h4>
-                  <p className="text-xs text-[#adadad]" data-oid="_b89cis">
-                    {item.description}
-                  </p>
                 </div>
                 <div className="text-right" data-oid="f:g9-vr">
                   <div className="text-xs mb-1" data-oid="3_9wxay">

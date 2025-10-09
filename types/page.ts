@@ -7,7 +7,8 @@ export type Screen =
   | "history"
   | "profile"
   | "subscription"
-  | "subscriptionAdd";
+  | "subscriptionAdd"
+  | "subscriptionList";
 
 export type SidebarNavKey = Screen | "subscription";
 
@@ -30,4 +31,14 @@ export interface Product {
 export type LandingCardContent = {
   title: string;
   renderIcon?: () => JSX.Element | null;
+};
+
+export type SubscriptionEntry = {
+  id: number;
+  productId: number;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+  frequencyDays: number;
 };

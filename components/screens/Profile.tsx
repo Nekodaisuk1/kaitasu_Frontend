@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FILTER_BUTTON_INACTIVE_STYLE, FILTER_BUTTON_TEXT_STYLE } from "@/components/screens/filterStyles";
+import type { Screen } from "@/types/page";
 
 type ProfileProps = {
   profilePage: number;
@@ -11,6 +12,7 @@ type ProfileProps = {
   onPageChange: (page: number) => void;
   monthlyBudget: number;
   onMonthlyBudgetChange: (value: number) => void;
+  onNavigate: (screen: Screen) => void;
 };
 
 export function Profile({
@@ -18,7 +20,8 @@ export function Profile({
   totalProfilePages,
   onPageChange,
   monthlyBudget,
-  onMonthlyBudgetChange
+  onMonthlyBudgetChange,
+  onNavigate
 }: ProfileProps) {
   return (
     <div className="flex-1 bg-white p-6 ml-[232px]" data-oid="3pchgx4">
@@ -152,6 +155,7 @@ export function Profile({
                       variant="ghost"
                       className="border border-transparent p-0"
                       style={FILTER_BUTTON_INACTIVE_STYLE}
+                      onClick={() => onNavigate("subscriptionList")}
                       data-oid="profile-page-two-button">
                       <span style={FILTER_BUTTON_TEXT_STYLE}>定期購入の確認</span>
                     </Button>

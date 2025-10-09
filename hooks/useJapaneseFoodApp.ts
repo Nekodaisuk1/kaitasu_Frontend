@@ -1,7 +1,13 @@
 import { MutableRefObject, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { LANDING_CARD_CONTENT_PAGES } from "@/components/catalog-landing/landing-icons";
-import type { LandingCardContent, Product, Screen, SidebarNavKey } from "@/types/page";
+import type {
+  LandingCardContent,
+  Product,
+  Screen,
+  SidebarNavKey,
+  SubscriptionEntry
+} from "@/types/page";
 import { SAMPLE_PRODUCTS } from "@/lib/data/sampleProducts";
 
 type NavigateHandler = (screen: Screen) => void;
@@ -33,12 +39,15 @@ type JapaneseFoodAppState = {
   onPageChange: PageChangeHandler;
   onUpdateProductQuantity: UpdateProductQuantityHandler;
   onSelectSubscriptionProduct: (product: Product) => void;
+  onSaveSubscriptionEntry: (entry: SubscriptionEntry) => void;
+  onRemoveSubscriptionEntry: (productId: number) => void;
   profilePage: number;
   products: Product[];
   selectedSubscriptionProduct: Product | null;
   subscriptionScrollRef: MutableRefObject<HTMLDivElement | null>;
   totalLandingPages: number;
   totalProfilePages: number;
+  subscriptionEntries: SubscriptionEntry[];
 };
 
 export const useJapaneseFoodApp = (): JapaneseFoodAppState => {
@@ -54,6 +63,7 @@ export const useJapaneseFoodApp = (): JapaneseFoodAppState => {
   const [profilePage, setProfilePage] = useState(1);
   const [landingPage, setLandingPage] = useState(1);
   const [selectedSubscriptionProduct, setSelectedSubscriptionProduct] = useState<Product | null>(null);
+  const [subscriptionEntries, setSubscriptionEntries] = useState<SubscriptionEntry[]>([]);
 
   const totalLandingPages = LANDING_CARD_CONTENT_PAGES.length;
   const landingPageIndex = Math.min(Math.max(landingPage - 1, 0), totalLandingPages - 1);
@@ -128,6 +138,23 @@ export const useJapaneseFoodApp = (): JapaneseFoodAppState => {
     setSelectedSubscriptionProduct(product);
   };
 
+  const onSaveSubscriptionEntry = (entry: SubscriptionEntry) => {
+    setSubscriptionEntries((prev) => {
+      const index = prev.findIndex((item) => item.productId === entry.productId);
+      if (index !== -1) {
+        const next = [...prev];
+        next[index] = entry;
+        return next;
+      }
+      return [...prev, entry];
+    });
+    setSelectedSubscriptionProduct(null);
+  };
+
+  const onRemoveSubscriptionEntry = (productId: number) => {
+    setSubscriptionEntries((prev) => prev.filter((entry) => entry.productId !== productId));
+  };
+
   return {
     cartItems,
     catalogPriceSum,
@@ -145,11 +172,14 @@ export const useJapaneseFoodApp = (): JapaneseFoodAppState => {
     onPageChange,
     onUpdateProductQuantity,
     onSelectSubscriptionProduct,
+    onSaveSubscriptionEntry,
+    onRemoveSubscriptionEntry,
     profilePage,
     products,
     selectedSubscriptionProduct,
     subscriptionScrollRef,
     totalLandingPages,
-    totalProfilePages
+    totalProfilePages,
+    subscriptionEntries
   };
 };
