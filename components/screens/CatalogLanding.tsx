@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FILTER_BUTTON_INACTIVE_STYLE, FILTER_BUTTON_TEXT_STYLE } from "@/components/screens/filterStyles";
 import type { LandingCardContent, Screen } from "@/types/page";
+import { cn } from "@/lib/utils";
 
 const LANDING_FILTER_BUTTONS = [
   { label: "健康重視", buttonDataOid: ".zvc9j.", textDataOid: "btn-text-health" },
@@ -148,11 +149,15 @@ export function CatalogLanding({
                 const Icon = card.renderIcon;
                 const isSelected = selectedCards.includes(index);
 
+                const lines = card.title.split("\n");
                 return (
                   <Button
                     key={`landing-card-${landingPage}-${index}`}
                     variant="ghost"
-                    className="relative flex h-[160px] w-[160px] flex-col items-center pt-[13px] border border-transparent p-0 transition-colors duration-200 hover:bg-[#fda900]/20"
+                    className={cn(
+                    "relative flex h-[160px] w-[160px] flex-col items-center pt-[13px] border border-transparent p-0 transition-colors duration-200 hover:bg-[#fda900]/20",
+                    index === 5 && "pt-[0px]",
+                  )}
                     onClick={() => handleCardToggle(index)}
                     data-oid={`catalog-landing-card-${index}`}>
                     <svg
@@ -210,7 +215,7 @@ export function CatalogLanding({
                       </div>
                     )}
                     <div
-                      className="relative z-10 flex h-full w-full flex-col items-center pt-[13px]"
+                      className="relative z-10 flex h-full w-full flex-col items-cente pt-[10px]"
                       data-oid={`catalog-landing-card-content-${index}`}>
                       <span
                       style={{
@@ -223,9 +228,16 @@ export function CatalogLanding({
                         letterSpacing: "1.248px"
                       }}
                       data-oid={`catalog-landing-card-title-${index}`}>
-                        {card.title}
+                        {lines.map((line, lineIndex) => (
+                          <Fragment key={`line-${lineIndex}`}>
+                            {line}
+                            {lineIndex < lines.length - 1 && <br />}
+                          </Fragment>
+                        ))}
                       </span>
-                      <div className="flex w-full flex-1 items-center justify-center pt-[13px]">
+                      <div className={cn("flex w-full flex-1 items-center justify-center pt-[13px]",
+                        ((index === 5)||(index === 6)||(index === 0)||(index === 1)) && "pt-[0px]"
+                      )}>
                         {Icon ? (
                           <div
                           className="flex h-[100px] w-[100px] items-center justify-center"

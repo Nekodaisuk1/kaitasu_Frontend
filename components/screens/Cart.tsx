@@ -73,7 +73,7 @@ export function Cart({
                   {item.name}
                 </h4>
               </div>
-              <div className="flex items-center gap-[20px] pr-[62px]" data-oid="cart-right-group">
+              <div className="flex items-center gap-[20px] pr-[20px]" data-oid="cart-right-group">
                 <Button
                   variant="ghost"
                   className="flex items-center gap-2 border-2 border-[#FDA900] rounded-[11.936px] bg-white px-4 py-2 shadow-[2.686px_2.686px_0_0_#E4E2E2]"
@@ -96,7 +96,10 @@ export function Cart({
                       width: "25px",
                       height: "25px",
                       borderRadius: "6px",
-                      background: "#FFF"
+                      background: "#FFF",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center"
                     }}
                     data-oid="cart-favorite-icon">
                     <svg
